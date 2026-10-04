@@ -33,22 +33,23 @@ static class Design {
 }
 class Card:Panel {
  readonly GlassEdge edge=new();GlassBorderOverlay? edgeOverlay;readonly Motion hoverMotion;double hover;bool hovering;
- public double ReflectionPhase=>edge.Phase;
- public Card(){DoubleBuffered=true;Padding=new(20);BackColor=Design.Surface;Margin=new(0,0,0,16);hoverMotion=new Motion(this,value=>{hover=value;InvalidateEdges();});edgeOverlay=new GlassBorderOverlay(this,edge,()=>hover);if(!GlassAnimation.Capture)Controls.Add(edgeOverlay);ControlAdded+=(_,e)=>{Observe(e.Control!);edgeOverlay.BringToFront();};GlassAnimation.Register(this);}
+ public double ReflectionPhase=>edge.Phase;public int ReflectionFrameBuilds=>edge.FrameBuilds;protected override void Dispose(bool disposing){if(disposing){edge.Dispose();edgeOverlay?.Dispose();}base.Dispose(disposing);}
+ public Card(){DoubleBuffered=true;Padding=new(20);BackColor=Design.Surface;Margin=new(0,0,0,16);hoverMotion=new Motion(this,value=>{hover=value;InvalidateEdges();},200);edgeOverlay=new GlassBorderOverlay(this,edge,()=>hover);if(!GlassAnimation.Capture)Controls.Add(edgeOverlay);ControlAdded+=(_,e)=>{Observe(e.Control!);edgeOverlay.BringToFront();};GlassAnimation.Register(this);}
  void Observe(Control control){control.MouseEnter+=(_,_)=>SetHover(true);control.MouseLeave+=(_,_)=>{if(!ClientRectangle.Contains(PointToClient(Cursor.Position)))SetHover(false);};control.ControlAdded+=(_,e)=>Observe(e.Control!);foreach(Control child in control.Controls)Observe(child);}
  void SetHover(bool value){if(hovering==value)return;hovering=value;hoverMotion.To(value?1:0);}
  protected override void OnMouseEnter(EventArgs e){SetHover(true);base.OnMouseEnter(e);}protected override void OnMouseLeave(EventArgs e){if(!ClientRectangle.Contains(PointToClient(Cursor.Position)))SetHover(false);base.OnMouseLeave(e);}
  internal void SyncMaterial()=>InvalidateEdges();
- internal void AnimateEdge(double delta){}
+ public double ReflectionDelay{set=>edge.SetDelay(value);}internal void AnimateEdge(double delta){edge.Advance(delta,false);InvalidateEdges();}
  void InvalidateEdges(){if(edgeOverlay==null||!IsHandleCreated||!Visible)return;if(GlassAnimation.Capture){if(edgeOverlay.Parent==this)Controls.Remove(edgeOverlay);return;}if(edgeOverlay.Parent==null&&Design.Glass){Controls.Add(edgeOverlay);edgeOverlay.Fit();}edgeOverlay.Visible=Design.Glass;if(edgeOverlay.Visible)edgeOverlay.Invalidate();}
- protected override void OnPaintBackground(PaintEventArgs e){if(Design.Glass){GlassMaterial.PaintCard(e.Graphics,this);return;}e.Graphics.Clear(Parent?.BackColor is Color background&&background.A==255?background:Design.Canvas);if(Width<2||Height<2)return;e.Graphics.SmoothingMode=SmoothingMode.AntiAlias;using var path=Design.Round(new RectangleF(.5f,.5f,Width-1,Height-1),Design.RadiusCard);using var fill=new SolidBrush(Design.Surface);e.Graphics.FillPath(fill,path);}
+ protected override void OnPaintBackground(PaintEventArgs e){if(Design.Glass){if(!GlassAnimation.Capture&&GlassAnimation.MotionAllowed)edge.Warm(this);GlassMaterial.PaintCard(e.Graphics,this);return;}e.Graphics.Clear(Parent?.BackColor is Color background&&background.A==255?background:Design.Canvas);if(Width<2||Height<2)return;e.Graphics.SmoothingMode=SmoothingMode.AntiAlias;using var path=Design.Round(new RectangleF(.5f,.5f,Width-1,Height-1),Design.RadiusCard);using var fill=new SolidBrush(Design.Surface);e.Graphics.FillPath(fill,path);}
  protected override void OnSizeChanged(EventArgs e){base.OnSizeChanged(e);if(Width<2||Height<2)return;using var path=Design.Round(new RectangleF(0,0,Width,Height),Math.Min(Design.RadiusCard,Math.Min(Width,Height)/2f));var old=Region;Region=new Region(path);old?.Dispose();edgeOverlay?.Fit();Invalidate();}
- protected override void OnPaint(PaintEventArgs e){base.OnPaint(e);if(Width<4||Height<4)return;if(Design.Glass){var state=e.Graphics.Save();using var clip=Design.Round(new RectangleF(0,0,Width,Height),Design.RadiusCard);e.Graphics.SetClip(clip,CombineMode.Intersect);edge.Paint(e.Graphics,this,hover);e.Graphics.Restore(state);}else{using var path=Design.Round(new RectangleF(.5f,.5f,Width-1,Height-1),Design.RadiusCard);using var pen=new Pen(Design.Border);e.Graphics.DrawPath(pen,path);}}
+ protected override void OnPaint(PaintEventArgs e){base.OnPaint(e);if(Width<4||Height<4)return;if(Design.Glass){var state=e.Graphics.Save();using var clip=Design.Round(new RectangleF(0,0,Width,Height),Design.RadiusCard);e.Graphics.SetClip(clip,CombineMode.Intersect);if(GlassAnimation.Capture||edgeOverlay?.Visible!=true){GlassBorderOverlay.BaseBorder(e.Graphics,this,hover);edge.Paint(e.Graphics,this,hover);}e.Graphics.Restore(state);}else{using var path=Design.Round(new RectangleF(.5f,.5f,Width-1,Height-1),Design.RadiusCard);using var pen=new Pen(Design.Border);e.Graphics.DrawPath(pen,path);}}
 }
 static class GlassAnimation {
+ [System.Runtime.InteropServices.DllImport("user32.dll")]static extern bool SystemParametersInfo(uint action,uint parameter,out int value,uint flags);public static bool? ReducedMotionOverride;static long policyChecked=-2000;static bool motionAllowed=true;public static bool MotionAllowed{get{if(ReducedMotionOverride.HasValue)return !ReducedMotionOverride.Value;long now=Environment.TickCount64;if(now-policyChecked>=1000){policyChecked=now;motionAllowed=!SystemParametersInfo(0x1042,0,out var enabled,0)||enabled!=0;}return motionAllowed;}}
  public static bool Capture;
  static readonly List<WeakReference<Card>> cards=new();static readonly System.Windows.Forms.Timer timer=new(){Interval=33};static readonly System.Diagnostics.Stopwatch clock=System.Diagnostics.Stopwatch.StartNew();static double previous;
- static GlassAnimation(){timer.Tick+=(_,_)=>{double now=clock.Elapsed.TotalSeconds,delta=Math.Min(.1,now-previous);previous=now;if(!Design.Glass||Capture)return;for(int i=cards.Count-1;i>=0;i--){if(!cards[i].TryGetTarget(out var card)||card.IsDisposed){cards.RemoveAt(i);continue;}var form=card.FindForm();if(card.IsHandleCreated&&card.Visible&&(form==null||form.Visible&&form.WindowState!=FormWindowState.Minimized))card.AnimateEdge(delta);}};timer.Start();}
+ static GlassAnimation(){timer.Tick+=(_,_)=>{double now=clock.Elapsed.TotalSeconds,delta=Math.Min(.1,now-previous);previous=now;if(!Design.Glass||Capture||!MotionAllowed)return;for(int i=cards.Count-1;i>=0;i--){if(!cards[i].TryGetTarget(out var card)||card.IsDisposed){cards.RemoveAt(i);continue;}var form=card.FindForm();if(card.IsHandleCreated&&card.Visible&&(form==null||form.Visible&&form.WindowState!=FormWindowState.Minimized))card.AnimateEdge(delta);}};timer.Start();}
  public static void Register(Card card)=>cards.Add(new(card));
 }
 class ModernButton:Button {
@@ -82,6 +83,9 @@ sealed class UiPreferences {
  public static UiPreferences Read(){try{return File.Exists(PathName)?JsonSerializer.Deserialize<UiPreferences>(File.ReadAllText(PathName))??new():new();}catch{return new();}}
  public void Save(){Directory.CreateDirectory(SubscriptionStore.DirectoryPath);var tmp=PathName+".tmp";File.WriteAllText(tmp,JsonSerializer.Serialize(this));File.Move(tmp,PathName,true);}
 }
+
+
+
 
 
 

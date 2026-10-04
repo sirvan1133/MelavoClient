@@ -2,7 +2,7 @@ using System.Diagnostics;
 namespace MelavoClient;
 sealed class Motion:IDisposable {
  readonly System.Windows.Forms.Timer timer=new(){Interval=16};readonly Stopwatch clock=new();readonly Action<double> paint;double from,to;public double Value{get;private set;}
- public Motion(Control owner,Action<double> update){paint=update;timer.Tick+=(_,_)=>{double t=Math.Min(1,clock.Elapsed.TotalMilliseconds/160);Value=from+(to-from)*(1-Math.Pow(1-t,3));paint(Value);if(t>=1)timer.Stop();};owner.Disposed+=(_,_)=>Dispose();}
+ public Motion(Control owner,Action<double> update,int duration=160){paint=update;timer.Tick+=(_,_)=>{double t=Math.Min(1,clock.Elapsed.TotalMilliseconds/duration);Value=from+(to-from)*(1-Math.Pow(1-t,3));paint(Value);if(t>=1)timer.Stop();};owner.Disposed+=(_,_)=>Dispose();}
  public void To(double target){from=Value;to=target;clock.Restart();timer.Start();}
  public void Dispose()=>timer.Dispose();
  public static void Reveal(Control target){foreach(var cover in target.Controls.OfType<TransitionCover>().ToArray())cover.Dispose();if(!target.IsDisposed){target.PerformLayout();target.Invalidate(true);}}
@@ -23,5 +23,6 @@ sealed class AnimatedDropDown:ToolStripDropDown {
  readonly Motion motion;bool closing,finished;ToolStripDropDownCloseReason reason;
  public AnimatedDropDown(){motion=new Motion(this,v=>{Opacity=Math.Clamp(v,0,1);if(closing&&v<.001){finished=true;Close(reason);}});Opened+=(_,_)=>{closing=finished=false;Opacity=0;motion.To(1);};Closing+=(_,e)=>{if(finished)return;e.Cancel=true;if(closing)return;closing=true;reason=e.CloseReason;motion.To(0);};}
 }
+
 
 

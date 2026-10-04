@@ -17,7 +17,7 @@ static class GlassMaterial {
   if(cached.Ambient!=null&&cached.Size==root.Size&&cached.Dark==Design.Dark)return cached;
   cached.Dispose();cached.Size=root.Size;cached.Dark=Design.Dark;int width=Math.Max(1,root.Width)+36,height=Math.Max(1,root.Height)+36;
   cached.Ambient=new Bitmap(width,height);using(var g=Graphics.FromImage(cached.Ambient))g.DrawImage(scene!,new Rectangle(0,0,width,height));
-  cached.Material=new Bitmap(width,height);using(var g=Graphics.FromImage(cached.Material)){g.DrawImage(blurred!,new Rectangle(0,0,width,height));using var tint=new SolidBrush(Design.Dark?Color.FromArgb(105,30,49,91):Color.FromArgb(192,250,252,255));g.FillRectangle(tint,new Rectangle(0,0,width,height));}
+  cached.Material=new Bitmap(width,height);using(var g=Graphics.FromImage(cached.Material)){g.DrawImage(blurred!,new Rectangle(0,0,width,height));using var tint=new SolidBrush(Design.Dark?Color.FromArgb(140,18,38,74):Color.FromArgb(192,250,252,255));g.FillRectangle(tint,new Rectangle(0,0,width,height));}
   return cached;
  }
  static void EnsureScene(){
@@ -45,8 +45,8 @@ static class GlassMaterial {
   if(ancestor is Card card){Surface(g,control);Finish(g,control,new Rectangle(-offset.X,-offset.Y,Math.Max(1,card.Width),Math.Max(1,card.Height)));}else Ambient(g,control);
  }
  static void Finish(Graphics g,Control control,Rectangle bounds){
-  using var highlight=new LinearGradientBrush(bounds,Color.FromArgb(Design.Dark?40:70,164,192,255),Color.FromArgb(0,255,255,255),110f);g.FillRectangle(highlight,control.ClientRectangle);
-  using var shadow=new LinearGradientBrush(bounds,Color.Transparent,Color.FromArgb(Design.Dark?22:5,0,3,14),90f);g.FillRectangle(shadow,control.ClientRectangle);
+  using var highlight=new LinearGradientBrush(bounds,Color.FromArgb(Design.Dark?12:35,164,192,255),Color.FromArgb(0,255,255,255),110f);g.FillRectangle(highlight,control.ClientRectangle);
+  using var shadow=new LinearGradientBrush(bounds,Color.Transparent,Color.FromArgb(Design.Dark?13:5,0,3,14),90f);g.FillRectangle(shadow,control.ClientRectangle);
  }
  public static void PaintCard(Graphics g,Control control){
   Ambient(g,control);if(control.Width<4||control.Height<4)return;
@@ -61,22 +61,47 @@ static class GlassMaterial {
   
  }
 }
-sealed class GlassEdge {
+// Cached, cropped reflection frames: timer paints only an image, never paths or blur.
+sealed class GlassEdge:IDisposable {
+ const int FrameCount=300;const double Span=.09;
  PointF[] points=Array.Empty<PointF>();float[] distance=Array.Empty<float>();float perimeter;Size size;int radius;
- public double Phase{get;private set;}
+ readonly Dictionary<int,(Bitmap Image,Rectangle Bounds)> frames=new();
+ static int sequence;
+ public double Phase{get;private set;}=(System.Threading.Interlocked.Increment(ref sequence)*.173)%1;
+ public int FrameBuilds{get;private set;}
+ public void SetDelay(double seconds){Phase=((1-seconds/10)%1+1)%1;}
  void Build(Control owner){
-  if(size==owner.Size&&radius==Design.RadiusCard)return;size=owner.Size;radius=Design.RadiusCard;
-  using var path=Design.Round(new RectangleF(1.2f,1.2f,Math.Max(2,owner.Width-2.4f),Math.Max(2,owner.Height-2.4f)),Math.Min(radius,Math.Min(owner.Width,owner.Height)/2f-1));path.Flatten(null,.3f);points=path.PathPoints.Concat(new[]{path.PathPoints[0]}).ToArray();distance=new float[points.Length];
+  if(size==owner.Size&&radius==Design.RadiusCard)return;DisposeFrames();size=owner.Size;radius=Design.RadiusCard;
+  using var path=Design.Round(new RectangleF(1,1,Math.Max(2,owner.Width-2),Math.Max(2,owner.Height-2)),Math.Min(radius,Math.Min(owner.Width,owner.Height)/2f-1));path.Flatten(null,.15f);points=path.PathPoints.Concat(new[]{path.PathPoints[0]}).ToArray();distance=new float[points.Length];
   for(int i=1;i<points.Length;i++){float dx=points[i].X-points[i-1].X,dy=points[i].Y-points[i-1].Y;distance[i]=distance[i-1]+MathF.Sqrt(dx*dx+dy*dy);}perimeter=distance[^1];
  }
- public void Advance(double delta,bool hovered){Phase=(Phase+delta/(hovered?6.5:9))%1;}
- public PointF Position(Control owner,double phase){Build(owner);float at=(float)((phase%1+1)%1)*perimeter;int index=Array.FindIndex(distance,value=>value>=at);index=Math.Clamp(index,1,points.Length-1);float t=(at-distance[index-1])/Math.Max(.01f,distance[index]-distance[index-1]);return new(points[index-1].X+(points[index].X-points[index-1].X)*t,points[index-1].Y+(points[index].Y-points[index-1].Y)*t);}
- public void Paint(Graphics g,Control owner,double hover){
-  if(owner.Width<20||owner.Height<20)return;g.SmoothingMode=SmoothingMode.AntiAlias;
-  float radius=Math.Min(Design.RadiusCard,Math.Min(owner.Width,owner.Height)/2f-2);
-  var corners=new[]{(new RectangleF(2,2,radius*2,radius*2),180f),(new RectangleF(owner.Width-radius*2-2,2,radius*2,radius*2),270f),(new RectangleF(owner.Width-radius*2-2,owner.Height-radius*2-2,radius*2,radius*2),0f),(new RectangleF(2,owner.Height-radius*2-2,radius*2,radius*2),90f)};
-  foreach(var (corner,angle) in corners){for(int layer=12;layer>=1;layer--){using var glow=new Pen(Color.FromArgb(layer==1?210:(int)(9+hover*8),Color.FromArgb(117,205,255)),layer==1?1.5f:layer*1.7f){StartCap=LineCap.Round,EndCap=LineCap.Round};g.DrawArc(glow,corner,angle+10,70);}}
+ public void Advance(double delta,bool hovered){Phase=(Phase+delta/10)%1;}
+ public PointF Position(Control owner,double phase){Build(owner);return At(phase);}
+ PointF At(double phase){float at=(float)((phase%1+1)%1)*perimeter;int index=Array.FindIndex(distance,value=>value>=at);index=Math.Clamp(index,1,points.Length-1);float t=(at-distance[index-1])/Math.Max(.01f,distance[index]-distance[index-1]);return new(points[index-1].X+(points[index].X-points[index-1].X)*t,points[index-1].Y+(points[index].Y-points[index-1].Y)*t);}
+ (Bitmap Image,Rectangle Bounds) Frame(int index){
+  if(frames.TryGetValue(index,out var cached))return cached;
+  const int samples=56;double phase=index/(double)FrameCount;
+  var line=Enumerable.Range(0,samples+1).Select(i=>At(phase-Span/2+i*Span/samples)).ToArray();
+  var bounds=Rectangle.FromLTRB((int)Math.Floor(line.Min(p=>p.X))-6,(int)Math.Floor(line.Min(p=>p.Y))-6,(int)Math.Ceiling(line.Max(p=>p.X))+6,(int)Math.Ceiling(line.Max(p=>p.Y))+6);
+  var bitmap=new Bitmap(Math.Max(1,bounds.Width),Math.Max(1,bounds.Height));using(var g=Graphics.FromImage(bitmap)){
+   g.SmoothingMode=SmoothingMode.AntiAlias;g.TranslateTransform(-bounds.X,-bounds.Y);
+   for(int i=0;i<samples;i++){
+    double t=(i+.5)/samples,feather=Math.Pow(Math.Sin(t*Math.PI),3);var color=t<.55?Design.Blend(Color.FromArgb(150,205,255),Color.FromArgb(105,185,255),t/.55):Design.Blend(Color.FromArgb(105,185,255),Color.FromArgb(180,150,255),(t-.55)/.45);
+    using var halo=new Pen(Color.FromArgb((int)(6*feather),color),9){StartCap=LineCap.Round,EndCap=LineCap.Round};g.DrawLine(halo,line[i],line[i+1]);
+    using var soft=new Pen(Color.FromArgb((int)(13*feather),color),4){StartCap=LineCap.Round,EndCap=LineCap.Round};g.DrawLine(soft,line[i],line[i+1]);
+    using var light=new Pen(Color.FromArgb((int)(166*feather),color),1.1f){StartCap=LineCap.Round,EndCap=LineCap.Round};g.DrawLine(light,line[i],line[i+1]);
+   }
+  }
+  FrameBuilds++;return frames[index]=(bitmap,bounds);
  }
+ public void Paint(Graphics g,Control owner,double hover){
+  if(owner.Width<12||owner.Height<12||!GlassAnimation.MotionAllowed)return;Build(owner);
+  var frame=Frame((int)(Phase*FrameCount)%FrameCount);
+  if(hover<.001)g.DrawImageUnscaled(frame.Image,frame.Bounds.Location);
+  else{using var attributes=new System.Drawing.Imaging.ImageAttributes();attributes.SetColorMatrix(new System.Drawing.Imaging.ColorMatrix{Matrix33=(float)(1+hover*.15)});g.DrawImage(frame.Image,frame.Bounds,0,0,frame.Image.Width,frame.Image.Height,GraphicsUnit.Pixel,attributes);}
+ }
+ public void Warm(Control owner){Build(owner);if(frames.Count==FrameCount)return;for(int i=0;i<FrameCount;i++)Frame(i);}
+ void DisposeFrames(){foreach(var frame in frames.Values)frame.Image.Dispose();frames.Clear();}
+ public void Dispose()=>DisposeFrames();
 }
-
 

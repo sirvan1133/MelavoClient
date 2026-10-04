@@ -11,8 +11,13 @@ sealed class GlassBorderOverlay:Control {
   if(material==null||material.Size!=Size||materialDark!=Design.Dark||windowSize!=currentWindow||position!=currentPosition){material?.Dispose();material=new Bitmap(Math.Max(1,Width),Math.Max(1,Height));using var graphics=Graphics.FromImage(material);GlassMaterial.PaintCard(graphics,this);materialDark=Design.Dark;windowSize=currentWindow;position=currentPosition;}
   e.Graphics.DrawImageUnscaled(material,0,0);
  }
- protected override void OnPaint(PaintEventArgs e){e.Graphics.SmoothingMode=SmoothingMode.AntiAlias;using var shape=Design.Round(new RectangleF(.5f,.5f,Width-1,Height-1),Design.RadiusCard);using var border=new Pen(Design.Blend(Design.Border,Design.BorderHover,.18+hover()*.3));edge.Paint(e.Graphics,this,hover());}
+ public static void BaseBorder(Graphics g,Control owner,double hover){
+  using var shape=Design.Round(new RectangleF(.5f,.5f,owner.Width-1,owner.Height-1),Design.RadiusCard);using var border=new Pen(Color.FromArgb((int)(41*(1+hover*.12)),170,205,255),1);g.DrawPath(border,shape);
+  using var inner=Design.Round(new RectangleF(1.5f,1.5f,owner.Width-3,owner.Height-3),Design.RadiusCard-1);using var light=new Pen(Color.FromArgb(15,255,255,255),1);g.DrawPath(light,inner);
+ }
+ protected override void OnPaint(PaintEventArgs e){e.Graphics.SmoothingMode=SmoothingMode.AntiAlias;BaseBorder(e.Graphics,this,hover());edge.Paint(e.Graphics,this,hover());}
  protected override void Dispose(bool disposing){if(disposing)material?.Dispose();base.Dispose(disposing);}
 }
+
 
 
