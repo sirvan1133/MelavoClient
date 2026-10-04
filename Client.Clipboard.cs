@@ -31,6 +31,7 @@ sealed partial class Client {
   var host=S(transport?["headers"]?["Host"]??transport?["host"]);var path=S(transport?["path"]);
   if(protocol=="vmess"){
    var data=new JsonObject{["v"]="2",["ps"]=S(profile["remarks"]),["add"]=S(endpoint["address"]),["port"]=S(endpoint["port"]),["id"]=S(user?["id"]),["aid"]=S(user?["alterId"]),["scy"]=S(user?["security"]),["net"]=network,["type"]=S(transport?["header"]?["type"]),["host"]=host,["path"]=network=="grpc"?S(transport?["serviceName"]):path,["tls"]=security=="none"?"":security,["sni"]=S(tls?["serverName"]),["fp"]=S(tls?["fingerprint"]),["alpn"]=tls?["alpn"] is JsonArray alpn?string.Join(',',alpn.Select(S)):""};
+   foreach(var key in new[]{network+"Settings","tlsSettings","realitySettings","sockopt"})if(stream?[key] is JsonObject options)data[key]=options.DeepClone();
    return "vmess://"+Convert.ToBase64String(Encoding.UTF8.GetBytes(data.ToJsonString()));
   }
   var query=new Dictionary<string,string>{{"type",network},{"security",security}};

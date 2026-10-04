@@ -58,51 +58,42 @@ static class GlassMaterial {
  public static void Title(Graphics g,Control control,bool separator=true){Surface(g,control);using var veil=new SolidBrush(Design.Dark?Color.FromArgb(105,5,12,27):Color.FromArgb(90,245,250,255));g.FillRectangle(veil,control.ClientRectangle);using var line=new Pen(Color.FromArgb(65,140,174,231));if(separator)g.DrawLine(line,0,control.Height-1,control.Width,control.Height-1);}
  public static void Input(Graphics g,Rectangle bounds,GraphicsPath shape,double focus){
   using var fill=new SolidBrush(Design.Surface);g.FillPath(fill,shape);
-  
-  
+  if(focus>0){using var accent=new Pen(Color.FromArgb((int)(Math.Clamp(focus,0,1)*90),Design.Accent),1.25f);g.DrawPath(accent,shape);}
  }
 }
 // Cached, cropped reflection frames: timer paints only an image, never paths or blur.
 sealed class GlassEdge:IDisposable {
- const int FrameCount=300;const double Span=.09;
+ const double Span=.09;
  PointF[] points=Array.Empty<PointF>();float[] distance=Array.Empty<float>();float perimeter;Size size;int radius;
- readonly Dictionary<int,(Bitmap Image,Rectangle Bounds)> frames=new();
+
  static int sequence;
  public double Phase{get;private set;}=(System.Threading.Interlocked.Increment(ref sequence)*.173)%1;
  public int FrameBuilds{get;private set;}
  public void SetDelay(double seconds){Phase=((1-seconds/10)%1+1)%1;}
  void Build(Control owner){
-  if(size==owner.Size&&radius==Design.RadiusCard)return;DisposeFrames();size=owner.Size;radius=Design.RadiusCard;
+  if(size==owner.Size&&radius==Design.RadiusCard)return;size=owner.Size;radius=Design.RadiusCard;
   using var path=Design.Round(new RectangleF(1,1,Math.Max(2,owner.Width-2),Math.Max(2,owner.Height-2)),Math.Min(radius,Math.Min(owner.Width,owner.Height)/2f-1));path.Flatten(null,.15f);points=path.PathPoints.Concat(new[]{path.PathPoints[0]}).ToArray();distance=new float[points.Length];
   for(int i=1;i<points.Length;i++){float dx=points[i].X-points[i-1].X,dy=points[i].Y-points[i-1].Y;distance[i]=distance[i-1]+MathF.Sqrt(dx*dx+dy*dy);}perimeter=distance[^1];
  }
  public void Advance(double delta,bool hovered){Phase=(Phase+delta/10)%1;}
  public PointF Position(Control owner,double phase){Build(owner);return At(phase);}
  PointF At(double phase){float at=(float)((phase%1+1)%1)*perimeter;int index=Array.FindIndex(distance,value=>value>=at);index=Math.Clamp(index,1,points.Length-1);float t=(at-distance[index-1])/Math.Max(.01f,distance[index]-distance[index-1]);return new(points[index-1].X+(points[index].X-points[index-1].X)*t,points[index-1].Y+(points[index].Y-points[index-1].Y)*t);}
- (Bitmap Image,Rectangle Bounds) Frame(int index){
-  if(frames.TryGetValue(index,out var cached))return cached;
-  const int samples=56;double phase=index/(double)FrameCount;
-  var line=Enumerable.Range(0,samples+1).Select(i=>At(phase-Span/2+i*Span/samples)).ToArray();
-  var bounds=Rectangle.FromLTRB((int)Math.Floor(line.Min(p=>p.X))-6,(int)Math.Floor(line.Min(p=>p.Y))-6,(int)Math.Ceiling(line.Max(p=>p.X))+6,(int)Math.Ceiling(line.Max(p=>p.Y))+6);
-  var bitmap=new Bitmap(Math.Max(1,bounds.Width),Math.Max(1,bounds.Height));using(var g=Graphics.FromImage(bitmap)){
-   g.SmoothingMode=SmoothingMode.AntiAlias;g.TranslateTransform(-bounds.X,-bounds.Y);
-   for(int i=0;i<samples;i++){
-    double t=(i+.5)/samples,feather=Math.Pow(Math.Sin(t*Math.PI),3);var color=t<.55?Design.Blend(Color.FromArgb(150,205,255),Color.FromArgb(105,185,255),t/.55):Design.Blend(Color.FromArgb(105,185,255),Color.FromArgb(180,150,255),(t-.55)/.45);
-    using var halo=new Pen(Color.FromArgb((int)(6*feather),color),9){StartCap=LineCap.Round,EndCap=LineCap.Round};g.DrawLine(halo,line[i],line[i+1]);
-    using var soft=new Pen(Color.FromArgb((int)(13*feather),color),4){StartCap=LineCap.Round,EndCap=LineCap.Round};g.DrawLine(soft,line[i],line[i+1]);
-    using var light=new Pen(Color.FromArgb((int)(166*feather),color),1.1f){StartCap=LineCap.Round,EndCap=LineCap.Round};g.DrawLine(light,line[i],line[i+1]);
-   }
-  }
-  FrameBuilds++;return frames[index]=(bitmap,bounds);
- }
  public void Paint(Graphics g,Control owner,double hover){
   if(owner.Width<12||owner.Height<12||!GlassAnimation.MotionAllowed)return;Build(owner);
-  var frame=Frame((int)(Phase*FrameCount)%FrameCount);
-  if(hover<.001)g.DrawImageUnscaled(frame.Image,frame.Bounds.Location);
-  else{using var attributes=new System.Drawing.Imaging.ImageAttributes();attributes.SetColorMatrix(new System.Drawing.Imaging.ColorMatrix{Matrix33=(float)(1+hover*.15)});g.DrawImage(frame.Image,frame.Bounds,0,0,frame.Image.Width,frame.Image.Height,GraphicsUnit.Pixel,attributes);}
+  const int samples=48;var line=Enumerable.Range(0,samples+1).Select(i=>At(Phase-Span/2+i*Span/samples)).ToArray();
+  var saved=g.Save();g.SmoothingMode=SmoothingMode.AntiAlias;
+  // Filled stroke strips share flat joins, avoiding overlapping round caps.
+  void Strip(float width,int peak){
+   for(int i=0;i<samples;i++){
+    double t=(i+.5)/samples,feather=Math.Pow(Math.Sin(t*Math.PI),3);
+    var color=t<.55?Design.Blend(Color.FromArgb(150,205,255),Color.FromArgb(105,185,255),t/.55):Design.Blend(Color.FromArgb(105,185,255),Color.FromArgb(180,150,255),(t-.55)/.45);
+    PointF Offset(int index,float sign){var prev=line[Math.Max(0,index-1)];var next=line[Math.Min(samples,index+1)];float dx=next.X-prev.X,dy=next.Y-prev.Y,length=Math.Max(.001f,MathF.Sqrt(dx*dx+dy*dy));return new(line[index].X-dy/length*width*.5f*sign,line[index].Y+dx/length*width*.5f*sign);}
+    using var brush=new SolidBrush(Color.FromArgb(Math.Clamp((int)(peak*feather*(1+hover*.15)),0,255),color));
+    g.FillPolygon(brush,new[]{Offset(i,1),Offset(i+1,1),Offset(i+1,-1),Offset(i,-1)});
+   }
+  }
+  Strip(9,6);Strip(4,13);Strip(1.1f,166);g.Restore(saved);
  }
- public void Warm(Control owner){Build(owner);if(frames.Count==FrameCount)return;for(int i=0;i<FrameCount;i++)Frame(i);}
- void DisposeFrames(){foreach(var frame in frames.Values)frame.Image.Dispose();frames.Clear();}
- public void Dispose()=>DisposeFrames();
+ public void Warm(Control owner)=>Build(owner);
+ public void Dispose(){}
 }
-
