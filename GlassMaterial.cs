@@ -41,6 +41,7 @@ static class GlassMaterial {
   var (root,offset)=Coordinates(control);var cached=ForWindow(root);g.DrawImageUnscaled(cached.Material!,-offset.X-18,-offset.Y-18);
  }
  public static void Backdrop(Graphics g,Control control){
+  if(control.FindForm() is Form dialog && dialog is not Client){Control? parent=control.Parent;while(parent!=null&&parent.BackColor.A!=255)parent=parent.Parent;g.Clear(parent?.BackColor??dialog.BackColor);return;}
   var offset=Point.Empty;Control? ancestor=control;while(ancestor!=null&&ancestor is not Card){offset.Offset(ancestor.Left,ancestor.Top);ancestor=ancestor.Parent;}
   if(ancestor is Card card){Surface(g,control);Finish(g,control,new Rectangle(-offset.X,-offset.Y,Math.Max(1,card.Width),Math.Max(1,card.Height)));}else Ambient(g,control);
  }

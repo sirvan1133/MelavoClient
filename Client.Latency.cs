@@ -5,7 +5,38 @@ using System.Text.Json.Nodes;
 namespace MelavoClient;
 sealed partial class Client {
  readonly CancellationTokenSource pingCancellation=new();bool pingTesting;readonly HashSet<string> latencyFailed=new();
- async Task CheckLatency(){if(preview){status.Text=L("Ping is unavailable in offline preview.","پینگ در پیش‌نمایش آفلاین اجرا نمی‌شود.");return;}if(servers.SelectedItems.Count==0||busy||updating||pingTesting)return;var profile=Profiles[(int)servers.SelectedItems[0].Tag!];var key=ProfileKey(profile);pingTesting=true;SetControls();status.Text=L("Measuring HTTPS through the selected tunnel…","اندازه‌گیری پاسخ HTTPS از تونل سرور انتخاب‌شده…");try{long ms=await MeasureProfile(profile,pingCancellation.Token);latency[key]=ms;latencyFailed.Remove(key);if(!IsDisposed){FillServers();status.Text=L($"Tunnel ping: {ms} ms · HTTPS response",$"پینگ تونل: {ms} ms · پاسخ HTTPS");}}catch(OperationCanceledException){}catch(Exception e){latency.Remove(key);latencyFailed.Add(key);if(!IsDisposed){FillServers();status.Text=L("Tunnel test did not respond; see About for diagnostics.","تست تونل پاسخ نداد؛ جزئیات در «درباره»");details.Text=L("Tunnel ping test: ","تست پینگ تونل: ")+SafeError(e.Message);}}finally{pingTesting=false;if(!IsDisposed)SetControls();}}
+ async Task CheckLatency(bool all=false){
+  if(preview||busy||updating||pingTesting||(!all&&servers.SelectedItems.Count==0))return;
+  var targets=(all?Profiles.ToArray():new[]{Profiles[(int)servers.SelectedItems[0].Tag!]}).Select(p=>(Profile:p,Key:ProfileKey(p))).ToArray();
+  if(targets.Length==0)return;
+  pingTesting=true;SetControls();int completed=0,responding=0;using var gate=new SemaphoreSlim(4);
+  try{await Task.WhenAll(targets.Select(async target=>{
+   await gate.WaitAsync(pingCancellation.Token);
+   try{var ms=await MeasureIcmpProfile(target.Profile,pingCancellation.Token);latency[target.Key]=ms;latencyFailed.Remove(target.Key);responding++;}
+   catch(OperationCanceledException){throw;}catch{latency.Remove(target.Key);latencyFailed.Add(target.Key);}finally{gate.Release();}
+   completed++;if(!IsDisposed){FillServers();status.Text=L($"ICMP ping: {completed}/{targets.Length} tested · {responding} responding",$"پینگ ICMP: {completed}/{targets.Length} بررسی شد · {responding} پاسخ داد");}
+  }));}catch(OperationCanceledException){}finally{pingTesting=false;if(!IsDisposed)SetControls();}
+ }
+ static string IcmpHost(JsonObject profile){
+  var settings=Outbound(profile)?["settings"];
+  var host=settings?["vnext"]?[0]?["address"]?.ToString()??settings?["servers"]?[0]?["address"]?.ToString();
+  if(string.IsNullOrWhiteSpace(host)){var endpoint=settings?["peers"]?[0]?["endpoint"]?.ToString();if(Uri.TryCreate("udp://"+endpoint,UriKind.Absolute,out var uri))host=uri.Host;}
+  if(string.IsNullOrWhiteSpace(host))throw new InvalidOperationException("Server address is missing.");
+  return host.Trim('[',']');
+ }
+ static async Task<long> MeasureIcmpProfile(JsonObject profile,CancellationToken cancel){
+  var addresses=await Dns.GetHostAddressesAsync(IcmpHost(profile),cancel);var results=new List<long>();
+  foreach(var address in addresses.OrderBy(a=>a.AddressFamily==AddressFamily.InterNetwork?0:1)){
+   using var ping=new System.Net.NetworkInformation.Ping();
+   for(int i=0;i<3;i++){cancel.ThrowIfCancellationRequested();try{
+    var reply=await ping.SendPingAsync(address,TimeSpan.FromSeconds(2),new byte[32],new System.Net.NetworkInformation.PingOptions(128,false),cancel);
+    if(reply.Status==System.Net.NetworkInformation.IPStatus.Success)results.Add(reply.RoundtripTime);
+   }catch(OperationCanceledException){throw;}catch(System.Net.NetworkInformation.PingException){}}
+   if(results.Count>0)break;
+  }
+  if(results.Count==0)throw new InvalidOperationException("No ICMP reply.");
+  return results.OrderBy(v=>v).ElementAt(results.Count/2);
+ }
  static async Task<long> MeasureTunnel(int port,CancellationToken cancel){
   // Always proxy through the selected configuration. No direct fallback.
   var results=new List<long>();Exception? last=null;
