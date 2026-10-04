@@ -2,7 +2,7 @@
 
 A modern Windows VPN client with a clean interface and support for Xray and sing-box. Available in English and Persian.
 
-[Download for Windows](https://github.com/sirvan1133/MelavoClient/releases/download/v0.8.0/Melavo-VPN-0.8.0-Windows-x64.zip)
+[Download for Windows](https://github.com/sirvan1133/MelavoClient/releases/download/v0.8.1/Melavo-VPN-0.8.1-Windows-x64.zip)
 
 ## فارسی
 
@@ -11,6 +11,7 @@ A modern Windows VPN client with a clean interface and support for Xray and sing
 [دریافت آخرین نسخه](https://github.com/sirvan1133/MelavoClient/releases/latest)
 
 ![Melavo VPN](docs/Melavo-VPN.png)
+
 
 
 

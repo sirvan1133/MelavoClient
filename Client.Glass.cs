@@ -10,13 +10,14 @@ sealed partial class PowerControl {
  void PaintGlass(Graphics g){
   Design.PaintBackdrop(g,this);g.SmoothingMode=SmoothingMode.AntiAlias;float size=Math.Min(Width,Height),cx=Width/2f,cy=Height/2f;
   var color=State==ConnectionState.Error?Design.Error:State==ConnectionState.Connected?Color.FromArgb(70,213,192):Design.Accent;
-  for(int i=7;i>0;i--){float radius=size*(.38f+i*.017f);using var glow=new SolidBrush(Color.FromArgb((State==ConnectionState.Connected?11:5)+(int)(glassEmphasis*3),color));g.FillEllipse(glow,cx-radius,cy-radius,radius*2,radius*2);}
+  for(int i=7;i>0;i--){float radius=size*(.38f+i*.017f);using var glow=new SolidBrush(Color.FromArgb((State==ConnectionState.Connected?16:13)+(int)(glassEmphasis*5),color));g.FillEllipse(glow,cx-radius,cy-radius,radius*2,radius*2);}
   var face=new RectangleF(cx-size*.37f,cy-size*.37f,size*.74f,size*.74f);
-  using var fill=new LinearGradientBrush(face,Design.Blend(Design.Surface,Color.White,Design.Dark?.14:.6),Design.Blend(Design.Surface,color,State==ConnectionState.Connected?.35:.10),65f);g.FillEllipse(fill,face);
+  using var fill=new LinearGradientBrush(face,Design.Blend(Design.Surface,Color.FromArgb(105,159,255),Design.Dark?.32:.6),Design.Blend(Design.Surface,Color.FromArgb(77,62,190),State==ConnectionState.Connected?.35:.32),65f);g.FillEllipse(fill,face);
   using var rim=new Pen(Design.Blend(Design.Border,Color.White,.35),Math.Max(1,size*.012f));g.DrawEllipse(rim,face);
   using var reflection=new Pen(Color.FromArgb(Design.Dark?80:210,Color.White),Math.Max(1,size*.018f));g.DrawArc(reflection,face.X+2,face.Y+2,face.Width-4,face.Height-4,205,100);
-  var glyphColor=State==ConnectionState.Disconnected?Design.Text:color;using var glyph=new Pen(glyphColor,size*.028f){StartCap=LineCap.Round,EndCap=LineCap.Round};float diameter=size*.34f;g.DrawArc(glyph,cx-diameter/2,cy-diameter*.35f,diameter,diameter,-43,266);g.DrawLine(glyph,cx,cy-diameter*.56f,cx,cy-diameter*.06f);
+  var orbit=new RectangleF(cx-size*.43f,cy-size*.43f,size*.86f,size*.86f);using(var blueRim=new Pen(Color.FromArgb(110,139,220,255),1.2f))g.DrawEllipse(blueRim,orbit);for(int halo=5;halo>=1;halo--){using var ring=new Pen(Color.FromArgb(halo==1?235:18,halo==1?Color.FromArgb(128,231,255):color),halo*1.7f);g.DrawEllipse(ring,face);}var glyphColor=State==ConnectionState.Disconnected?Color.White:color;using var glyph=new Pen(glyphColor,size*.028f){StartCap=LineCap.Round,EndCap=LineCap.Round};float diameter=size*.34f;g.DrawArc(glyph,cx-diameter/2,cy-diameter*.35f,diameter,diameter,-43,266);g.DrawLine(glyph,cx,cy-diameter*.56f,cx,cy-diameter*.06f);
   if(State is ConnectionState.Connecting or ConnectionState.Disconnecting){using var progress=new Pen(color,size*.02f){StartCap=LineCap.Round,EndCap=LineCap.Round};g.DrawArc(progress,cx-size*.44f,cy-size*.44f,size*.88f,size*.88f,Phase*45,92);}
   if(Focused){using var focus=new Pen(color,2);g.DrawEllipse(focus,cx-size*.46f,cy-size*.46f,size*.92f,size*.92f);}
  }
 }
+

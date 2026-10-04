@@ -4,7 +4,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
-    <Version>0.8.0</Version>
+    <Version>0.8.1</Version>
     <DefineConstants Condition="'$(CustomerEdition)' == 'true'">$(DefineConstants);CUSTOMER_EDITION</DefineConstants>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -13,7 +13,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Assets\Melavo.ico" />
+    <EmbeddedResource Include="Assets\Melavo.ico" /><EmbeddedResource Include="Assets\GlassWallpaper.png" />
     <PackageReference Include="QRCoder" Version="1.6.0" />
   </ItemGroup>
 </Project>
+
+

@@ -17,7 +17,7 @@ static class GlassMaterial {
   if(cached.Ambient!=null&&cached.Size==root.Size&&cached.Dark==Design.Dark)return cached;
   cached.Dispose();cached.Size=root.Size;cached.Dark=Design.Dark;int width=Math.Max(1,root.Width)+36,height=Math.Max(1,root.Height)+36;
   cached.Ambient=new Bitmap(width,height);using(var g=Graphics.FromImage(cached.Ambient))g.DrawImage(scene!,new Rectangle(0,0,width,height));
-  cached.Material=new Bitmap(width,height);using(var g=Graphics.FromImage(cached.Material)){g.DrawImage(blurred!,new Rectangle(0,0,width,height));using var tint=new SolidBrush(Design.Dark?Color.FromArgb(116,17,31,53):Color.FromArgb(164,250,252,255));g.FillRectangle(tint,new Rectangle(0,0,width,height));}
+  cached.Material=new Bitmap(width,height);using(var g=Graphics.FromImage(cached.Material)){g.DrawImage(blurred!,new Rectangle(0,0,width,height));using var tint=new SolidBrush(Design.Dark?Color.FromArgb(105,30,49,91):Color.FromArgb(192,250,252,255));g.FillRectangle(tint,new Rectangle(0,0,width,height));}
   return cached;
  }
  static void EnsureScene(){
@@ -30,7 +30,8 @@ static class GlassMaterial {
    Glow(new RectangleF(-180,420,1100,780),Color.FromArgb(23,141,183),Design.Dark?41:35);
    using var wave=new GraphicsPath();wave.AddBezier(-80,550,250,180,570,850,1100,230);using var light=new Pen(Color.FromArgb(Design.Dark?17:21,110,163,226),26){StartCap=LineCap.Round,EndCap=LineCap.Round};g.DrawPath(light,wave);
   }
-  blurred=BackdropBlur.Create(scene,10);BlurBuilds++;
+  using(var stream=typeof(GlassMaterial).Assembly.GetManifestResourceStream("MelavoClient.Assets.GlassWallpaper.png"))if(stream!=null){using var artwork=Image.FromStream(stream);using var graphics=Graphics.FromImage(scene);graphics.DrawImage(artwork,new Rectangle(0,0,scene.Width,scene.Height));if(!Design.Dark){using var veil=new SolidBrush(Color.FromArgb(178,239,246,255));graphics.FillRectangle(veil,new Rectangle(0,0,scene.Width,scene.Height));}}
+  blurred=BackdropBlur.Create(scene,5);BlurBuilds++;
  }
  static (Control Root,Point Offset) Coordinates(Control control){var offset=Point.Empty;Control root=control;while(root.Parent!=null){offset.Offset(root.Left,root.Top);root=root.Parent;}return(root,offset);}
  public static void Ambient(Graphics g,Control control){
@@ -44,7 +45,7 @@ static class GlassMaterial {
   if(ancestor is Card card){Surface(g,control);Finish(g,control,new Rectangle(-offset.X,-offset.Y,Math.Max(1,card.Width),Math.Max(1,card.Height)));}else Ambient(g,control);
  }
  static void Finish(Graphics g,Control control,Rectangle bounds){
-  using var highlight=new LinearGradientBrush(bounds,Color.FromArgb(Design.Dark?15:45,255,255,255),Color.FromArgb(0,255,255,255),110f);g.FillRectangle(highlight,control.ClientRectangle);
+  using var highlight=new LinearGradientBrush(bounds,Color.FromArgb(Design.Dark?57:70,164,192,255),Color.FromArgb(0,255,255,255),110f);g.FillRectangle(highlight,control.ClientRectangle);
   using var shadow=new LinearGradientBrush(bounds,Color.Transparent,Color.FromArgb(Design.Dark?22:5,0,3,14),90f);g.FillRectangle(shadow,control.ClientRectangle);
  }
  public static void PaintCard(Graphics g,Control control){
@@ -72,8 +73,8 @@ sealed class GlassEdge {
  public void Paint(Graphics g,Control owner,double hover){
   if(owner.Width<8||owner.Height<8)return;Build(owner);float length=Math.Clamp(perimeter*.065f,56,145);int segments=22;
   for(int i=0;i<segments;i++){double phase=Phase-i*length/segments/perimeter;var first=Position(owner,phase);var second=Position(owner,phase-length/segments/perimeter);float fade=MathF.Sin((1-i/(float)segments)*MathF.PI/2);var color=Design.Blend(Color.FromArgb(117,211,245),Design.Accent,i/(double)segments);
-   using var glow=new Pen(Color.FromArgb((int)((9+hover*5)*fade),color),5){StartCap=LineCap.Round,EndCap=LineCap.Round};g.DrawLine(glow,first,second);
-   using var light=new Pen(Color.FromArgb((int)((96+hover*36)*fade),color),1.35f){StartCap=LineCap.Round,EndCap=LineCap.Round};g.DrawLine(light,first,second);
+   using var glow=new Pen(Color.FromArgb((int)((38+hover*18)*fade),color),8){StartCap=LineCap.Round,EndCap=LineCap.Round};g.DrawLine(glow,first,second);
+   using var light=new Pen(Color.FromArgb((int)((218+hover*30)*fade),Color.FromArgb(196,225,255)),1.8f){StartCap=LineCap.Round,EndCap=LineCap.Round};g.DrawLine(light,first,second);
   }
  }
 }
