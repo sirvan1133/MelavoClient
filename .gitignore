@@ -1,0 +1,13 @@
+bin/
+obj/
+publish/
+data/
+core/
+.vs/
+*.user
+*.suo
+*.pdb
+*.zip
+*-checks.txt
+qr-fixture.png
+review-*.png
