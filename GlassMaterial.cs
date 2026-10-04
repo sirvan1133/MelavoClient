@@ -57,8 +57,8 @@ static class GlassMaterial {
  public static void Title(Graphics g,Control control,bool separator=true){Surface(g,control);using var veil=new SolidBrush(Design.Dark?Color.FromArgb(105,5,12,27):Color.FromArgb(90,245,250,255));g.FillRectangle(veil,control.ClientRectangle);using var line=new Pen(Color.FromArgb(65,140,174,231));if(separator)g.DrawLine(line,0,control.Height-1,control.Width,control.Height-1);}
  public static void Input(Graphics g,Rectangle bounds,GraphicsPath shape,double focus){
   using var fill=new SolidBrush(Design.Surface);g.FillPath(fill,shape);
-  using var inner=new Pen(Color.FromArgb(Design.Dark?18:90,Color.White));g.DrawPath(inner,shape);
-  if(focus>.01){using var glow=new Pen(Color.FromArgb((int)(20*focus),Design.Accent),4);g.DrawPath(glow,shape);}
+  using var inner=new Pen(Color.FromArgb(Design.Dark?18:90,Color.White));
+  
  }
 }
 sealed class GlassEdge {
@@ -72,13 +72,11 @@ sealed class GlassEdge {
  public void Advance(double delta,bool hovered){Phase=(Phase+delta/(hovered?6.5:9))%1;}
  public PointF Position(Control owner,double phase){Build(owner);float at=(float)((phase%1+1)%1)*perimeter;int index=Array.FindIndex(distance,value=>value>=at);index=Math.Clamp(index,1,points.Length-1);float t=(at-distance[index-1])/Math.Max(.01f,distance[index]-distance[index-1]);return new(points[index-1].X+(points[index].X-points[index-1].X)*t,points[index-1].Y+(points[index].Y-points[index-1].Y)*t);}
  public void Paint(Graphics g,Control owner,double hover){
-  if(owner.Width<8||owner.Height<8)return;Build(owner);float length=Math.Clamp(perimeter*.045f,48,110);int segments=22;
-  for(int i=0;i<segments;i++){double phase=Phase-i*length/segments/perimeter;var first=Position(owner,phase);var second=Position(owner,phase-length/segments/perimeter);float fade=MathF.Sin((1-i/(float)segments)*MathF.PI/2);var color=Design.Blend(Color.FromArgb(117,211,245),Design.Accent,i/(double)segments);
-   using var glow=new Pen(Color.FromArgb((int)((24+hover*18)*fade),color),8){StartCap=LineCap.Round,EndCap=LineCap.Round};g.DrawLine(glow,first,second);
-   using var light=new Pen(Color.FromArgb((int)((186+hover*45)*fade),Color.FromArgb(196,225,255)),1.8f){StartCap=LineCap.Round,EndCap=LineCap.Round};g.DrawLine(light,first,second);
-  }
+  if(owner.Width<20||owner.Height<20)return;g.SmoothingMode=SmoothingMode.AntiAlias;
+  float radius=Math.Min(Design.RadiusCard,Math.Min(owner.Width,owner.Height)/2f-2);
+  var corners=new[]{(new RectangleF(2,2,radius*2,radius*2),180f),(new RectangleF(owner.Width-radius*2-2,2,radius*2,radius*2),270f),(new RectangleF(owner.Width-radius*2-2,owner.Height-radius*2-2,radius*2,radius*2),0f),(new RectangleF(2,owner.Height-radius*2-2,radius*2,radius*2),90f)};
+  foreach(var (corner,angle) in corners){for(int layer=12;layer>=1;layer--){using var glow=new Pen(Color.FromArgb(layer==1?210:(int)(9+hover*8),Color.FromArgb(117,205,255)),layer==1?1.5f:layer*1.7f){StartCap=LineCap.Round,EndCap=LineCap.Round};g.DrawArc(glow,corner,angle+10,70);}}
  }
 }
-
 
 

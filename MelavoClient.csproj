@@ -4,7 +4,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
-    <Version>0.8.2</Version>
+    <Version>0.8.3</Version>
     <DefineConstants Condition="'$(CustomerEdition)' == 'true'">$(DefineConstants);CUSTOMER_EDITION</DefineConstants>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -17,6 +17,7 @@
     <PackageReference Include="QRCoder" Version="1.6.0" />
   </ItemGroup>
 </Project>
+
 
 
 
