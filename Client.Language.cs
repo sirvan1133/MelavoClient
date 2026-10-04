@@ -18,7 +18,7 @@ sealed partial class Client {
   if(root.AccessibleName is string accessible&&English.TryGetValue(accessible,out var accessibleEnglish))root.AccessibleName=L(accessibleEnglish,accessible);
  }
  void ApplyLanguage(){
-  RightToLeft=Fa?RightToLeft.Yes:RightToLeft.No;
+  RightToLeft=Fa?RightToLeft.Yes:RightToLeft.No;titleBar?.Configure(Fa);
   if(Controls.OfType<TableLayoutPanel>().FirstOrDefault() is TableLayoutPanel shell){shell.RightToLeft=RightToLeft.No;var sidebar=shell.Controls.OfType<Card>().FirstOrDefault();if(sidebar!=null&&pageHost!=null){shell.SuspendLayout();shell.SetColumn(sidebar,Fa?1:0);shell.SetColumn(pageHost,Fa?0:1);shell.ColumnStyles[0].SizeType=Fa?SizeType.Percent:SizeType.Absolute;shell.ColumnStyles[0].Width=Fa?100:176;shell.ColumnStyles[1].SizeType=Fa?SizeType.Absolute:SizeType.Percent;shell.ColumnStyles[1].Width=Fa?176:100;shell.ResumeLayout();}}
   void Direction(Control control){if(control is not ModernInput&&control!=serverSummary&&control!=details&&!(control is Label l&&metrics.Values.Any(values=>values.Contains(l))))control.RightToLeft=RightToLeft;foreach(Control child in control.Controls)Direction(child);}Direction(this);if(Controls.OfType<TableLayoutPanel>().FirstOrDefault() is TableLayoutPanel fixedShell)fixedShell.RightToLeft=RightToLeft.No;
   url.RightToLeft=details.RightToLeft=RightToLeft.No;servers.RightToLeft=RightToLeft;

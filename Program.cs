@@ -11,6 +11,7 @@ static class Program
         // To customize application configuration such as set high DPI settings or default font,
         // see https://aka.ms/applicationconfiguration.
         ApplicationConfiguration.Initialize();
+        if(args.Any(a=>a.EndsWith("checks",StringComparison.Ordinal)))Application.SetUnhandledExceptionMode(UnhandledExceptionMode.ThrowException);
         using var mutex=new Mutex(true,args.Any(a=>a is "--preview" or "--ui-checks" or "--validate" or "--network-check" or "--update-checks" or "--latency-checks" or "--render-checks" or "--profile-checks" or "--management-checks")?"Local\\MelavoReview-"+Guid.NewGuid():"Local\\"+SubscriptionStore.ProfileName,out var unique);
         if(!unique){MessageBox.Show("برنامه از قبل باز است.");return;}
         if(args.Length==2 && args[0]=="--management-checks"){Environment.Exit(Client.ManagementChecks(args[1]));return;}
