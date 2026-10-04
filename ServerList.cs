@@ -58,14 +58,14 @@ sealed class ServerList:Control {
  protected override void OnKeyDown(KeyEventArgs e){base.OnKeyDown(e);if(Items.Count==0)return;int current=SelectedIndices.FirstOrDefault();int next=e.KeyCode switch{Keys.Up=>current-1,Keys.Down=>current+1,Keys.PageUp=>current-Math.Max(1,scroll.Viewport/Row),Keys.PageDown=>current+Math.Max(1,scroll.Viewport/Row),Keys.Home=>0,Keys.End=>Items.Count-1,_=>-1};if(next<0&&e.KeyCode!=Keys.Up)return;next=Math.Clamp(next,0,Items.Count-1);Items[next].Selected=true;if(next*Row<scroll.Value)scroll.Value=next*Row;else if((next+1)*Row>scroll.Value+scroll.Viewport)scroll.Value=(next+1)*Row-scroll.Viewport;e.Handled=true;}
  void PaintEmpty(Graphics graphics){
   graphics.SmoothingMode=System.Drawing.Drawing2D.SmoothingMode.AntiAlias;int unit=Design.Scale(this,1),cx=Width/2,cy=Header+(Height-Header)/2-30*unit;var circle=new Rectangle(cx-42*unit,cy-66*unit,84*unit,84*unit);
-  for(int i=0;i<2;i++){
+  using(var shadow=new SolidBrush(Color.FromArgb(30,0,4,18)))graphics.FillEllipse(shadow,cx-28*unit,cy+32*unit,65*unit,10*unit);for(int i=0;i<2;i++){
  float y=cy-8*unit+i*22*unit,x=cx-29*unit,w=54*unit,h=18*unit,depth=13*unit;
  PointF[] top={new(x,y),new(x+depth,y-9*unit),new(x+w+depth,y-9*unit),new(x+w,y)};
  PointF[] side={new(x+w,y),new(x+w+depth,y-9*unit),new(x+w+depth,y+h-9*unit),new(x+w,y+h)};
  using var glow=new Pen(Color.FromArgb(35,90,140,255),5*unit);graphics.DrawPolygon(glow,top);
  using var topFill=new System.Drawing.Drawing2D.LinearGradientBrush(new RectangleF(x,y-9*unit,w+depth,h),Color.FromArgb(110,156,240),Color.FromArgb(35,56,110),70);graphics.FillPolygon(topFill,top);
  using var sideFill=new SolidBrush(Color.FromArgb(38,58,117));graphics.FillPolygon(sideFill,side);
- using var outline=new Pen(Color.FromArgb(130,173,255),unit);graphics.DrawPolygon(outline,top);graphics.DrawPolygon(outline,side);
+ using var outline=new Pen(Color.FromArgb(160,130,173,255),unit);graphics.DrawPolygon(outline,top);graphics.DrawPolygon(outline,side);
  var face=new RectangleF(x,y,w,h);using var shape=Design.Round(face,4*unit);using var fill=new System.Drawing.Drawing2D.LinearGradientBrush(face,Color.FromArgb(61,90,153),Color.FromArgb(27,43,89),90);graphics.FillPath(fill,shape);graphics.DrawPath(outline,shape);
  for(int j=0;j<2;j++){using var dot=new SolidBrush(i==0?Color.FromArgb(95,220,255):Color.FromArgb(177,154,255));graphics.FillEllipse(dot,x+w-(10+j*7)*unit,y+7*unit,4*unit,4*unit);}
  }
@@ -77,6 +77,7 @@ sealed class ServerList:Control {
  internal static string StripFlags(string text)=>string.Concat(text.EnumerateRunes().Where(r=>r.Value is <0x1F1E6 or >0x1F1FF).Select(r=>r.ToString())).Trim();
  protected override void Dispose(bool disposing){if(disposing){tips.Dispose();smooth.Dispose();}base.Dispose(disposing);}
 }
+
 
 
 

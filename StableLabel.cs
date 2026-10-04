@@ -9,5 +9,6 @@ sealed class StableLabel:Label {
   TextRenderer.DrawText(e.Graphics,Text,Font,new Rectangle(rtl?0:iconWidth+3,0,Math.Max(1,Width-iconWidth-3),Height),ForeColor,Design.TextFlags(Text)|TextFormatFlags.EndEllipsis);
  }
 }
-sealed class BufferedPanel:Panel {public BufferedPanel(){DoubleBuffered=true;}protected override void OnPaint(PaintEventArgs e){base.OnPaint(e);if(Design.Glass&&Parent is BufferedTable){using var divider=new Pen(Color.FromArgb(65,129,168,246));e.Graphics.DrawLine(divider,Width-1,8,Width-1,Height-8);}}}
-sealed class BufferedTable:TableLayoutPanel {public BufferedTable(){DoubleBuffered=true;}}
+sealed class BufferedPanel:Panel {public BufferedPanel(){DoubleBuffered=true;}protected override void OnPaintBackground(PaintEventArgs e){if(Design.Glass)Design.PaintBackdrop(e.Graphics,this);else base.OnPaintBackground(e);}protected override void OnPaint(PaintEventArgs e){base.OnPaint(e);if(Design.Glass&&Parent is BufferedTable){using var divider=new Pen(Color.FromArgb(65,129,168,246));e.Graphics.DrawLine(divider,Width-1,8,Width-1,Height-8);}}}
+sealed class BufferedTable:TableLayoutPanel {public BufferedTable(){DoubleBuffered=true;}protected override void OnPaintBackground(PaintEventArgs e){if(Design.Glass)Design.PaintBackdrop(e.Graphics,this);else base.OnPaintBackground(e);}}
+sealed class BufferedFlow:FlowLayoutPanel {public BufferedFlow(){DoubleBuffered=true;}protected override void OnPaintBackground(PaintEventArgs e){if(Design.Glass)Design.PaintBackdrop(e.Graphics,this);else base.OnPaintBackground(e);}}
