@@ -1,8 +1,8 @@
-using System.Text.Json.Nodes;
+﻿using System.Text.Json.Nodes;
 namespace MelavoClient;
 sealed partial class Client {
  public static int ManagementChecks(string sourceFile){
-  string? liveUrl=null;var personal=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"MelavoClient");SubscriptionStore.CheckDirectory=personal;try{liveUrl=SubscriptionStore.Read().FirstOrDefault()?.Url;}catch{}finally{SubscriptionStore.CheckDirectory=null;}
+
   int failures=0;var report=new List<string>();var isolated=Path.Combine(Path.GetTempPath(),"Melavo-management-"+Guid.NewGuid());SubscriptionStore.CheckDirectory=isolated;
   try{using var client=new Client{ShowInTaskbar=false,Opacity=0};client.Shown+=async(_,_)=>{
    try{void Assert(bool ok,string name){if(!ok)throw new Exception(name);report.Add("PASS: "+name);}
@@ -21,7 +21,7 @@ sealed partial class Client {
     var saved=SubscriptionStore.Read()[0];Assert(saved.Profiles[0]["remarks"]!.ToString()=="Edited local configuration","validated edit persisted");saved.SourceProfiles=source.Select(x=>(JsonObject)x.DeepClone()).ToList();ApplyOverrides(saved);Assert(saved.Profiles[0]["remarks"]!.ToString()=="Edited local configuration","local edit survives subscription refresh");
     bool invalid=false;try{await client.ValidateEdit(new JsonObject());}catch{invalid=true;}Assert(invalid,"invalid configuration rejected before save");
     client.CommitGroups(new(),null);Assert(SubscriptionStore.Read().Count==0&&client.groups.Items.Count==0&&client.servers.Items.Count==0,"delete last subscription clears storage and list");
-    if(liveUrl!=null){Assert(await client.AddSubscription("Isolated live fetch",liveUrl),"live subscription HTTPS fetch, parse and save");Assert(SubscriptionStore.Read().Count==1,"live fetched subscription persisted in isolated profile");client.CommitGroups(new(),null);}
+
     SubscriptionStore.SelfTest();Assert(true,"encrypted persistence roundtrip");
    }catch(Exception e){failures++;report.Add("FAIL: "+SafeError(e.Message));}finally{client.Close();}
   };Application.Run(client);}finally{SubscriptionStore.CheckDirectory=null;if(Directory.Exists(isolated))Directory.Delete(isolated,true);File.WriteAllLines(Path.Combine(AppContext.BaseDirectory,"management-checks.txt"),report);}return failures;

@@ -1,4 +1,4 @@
-using System.Drawing.Drawing2D;
+﻿using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
 namespace MelavoClient;
 // Rendering primitives are shared by input, menus, lists and page scrollbars.
@@ -19,15 +19,26 @@ sealed class SlimScrollBar:Control {
  protected override void OnMouseWheel(MouseEventArgs e){if(WheelRequested!=null)WheelRequested(e.Delta);else Value-=e.Delta*40/120;base.OnMouseWheel(e);}
 }
 sealed class ModernInput:UserControl {
- sealed class InputTextBox:TextBox{public Action<int>? Wheel;protected override void WndProc(ref Message m){if(m.Msg==0x20A&&Multiline){Wheel?.Invoke(unchecked((short)((long)m.WParam>>16)));return;}base.WndProc(ref m);}}
+ sealed class InputTextBox:TextBox{
+  public Action<int>? Wheel;public string Hint="";
+  protected override void WndProc(ref Message m){
+   if(m.Msg==0x20A&&Multiline){Wheel?.Invoke(unchecked((short)((long)m.WParam>>16)));return;}
+   base.WndProc(ref m);
+   if((m.Msg==0xF||m.Msg==0x318)&&Text.Length==0&&Hint.Length>0){
+    using var g=m.Msg==0x318&&m.WParam!=IntPtr.Zero?Graphics.FromHdc(m.WParam):Graphics.FromHwnd(Handle);
+    TextRenderer.DrawText(g,Hint,Font,ClientRectangle,Design.Muted,TextFormatFlags.NoPadding|TextFormatFlags.EndEllipsis|(Multiline?TextFormatFlags.Top:TextFormatFlags.VerticalCenter)|(Multiline?TextFormatFlags.WordBreak:TextFormatFlags.SingleLine)|(RightToLeft==RightToLeft.Yes?TextFormatFlags.RightToLeft|TextFormatFlags.Right:TextFormatFlags.Left));
+   }
+  }
+ }
  readonly InputTextBox editor=new(){BorderStyle=BorderStyle.None,AutoSize=false};readonly SlimScrollBar scroll=new();bool hover;string? error;readonly Motion interaction;double emphasis;
  [DllImport("user32.dll")]static extern IntPtr SendMessage(IntPtr h,int m,IntPtr w,IntPtr l);
- public ModernInput(){interaction=new Motion(this,v=>{emphasis=v;Invalidate();});AutoScaleMode=AutoScaleMode.None;SetStyle(ControlStyles.UserPaint|ControlStyles.OptimizedDoubleBuffer|ControlStyles.AllPaintingInWmPaint,true);Height=40;Cursor=Cursors.IBeam;editor.Cursor=Cursors.IBeam;Margin=new(4);Controls.Add(editor);Controls.Add(scroll);editor.TextChanged+=(_,_)=>{error=null;Invalidate();OnTextChanged(EventArgs.Empty);SyncScroll();};editor.GotFocus+=(_,_)=>interaction.To(1);editor.LostFocus+=(_,_)=>interaction.To(hover?.4:0);editor.MouseEnter+=(_,_)=>{hover=true;interaction.To(editor.Focused?1:.4);};editor.MouseLeave+=(_,_)=>{hover=false;interaction.To(editor.Focused?1:0);};editor.Wheel=delta=>{if(scroll.Maximum>0)scroll.Value-=Math.Sign(delta)*Math.Max(1,SystemInformation.MouseWheelScrollLines);};editor.KeyUp+=(_,_)=>SyncScroll();scroll.WheelRequested=delta=>{if(scroll.Maximum>0)scroll.Value-=Math.Sign(delta)*Math.Max(1,SystemInformation.MouseWheelScrollLines);};scroll.ValueChanged+=(_,_)=>{if(!editor.IsHandleCreated)return;int first=(int)SendMessage(editor.Handle,0xCE,IntPtr.Zero,IntPtr.Zero);SendMessage(editor.Handle,0xB6,IntPtr.Zero,(IntPtr)(scroll.Value-first));};AccessibleRole=AccessibleRole.Text;TabStop=true;}
+ public ModernInput(){interaction=new Motion(this,v=>{emphasis=v;Invalidate();});AutoScaleMode=AutoScaleMode.None;SetStyle(ControlStyles.UserPaint|ControlStyles.OptimizedDoubleBuffer|ControlStyles.AllPaintingInWmPaint,true);Height=40;Cursor=Cursors.IBeam;editor.Cursor=Cursors.IBeam;Margin=new(4);Controls.Add(editor);Controls.Add(scroll);editor.TextChanged+=(_,_)=>{error=null;Invalidate();OnTextChanged(EventArgs.Empty);SyncScroll();};editor.GotFocus+=(_,_)=>{interaction.To(1);};editor.LostFocus+=(_,_)=>{interaction.To(hover?.4:0);};editor.MouseEnter+=(_,_)=>{hover=true;interaction.To(editor.Focused?1:.4);};editor.MouseLeave+=(_,_)=>{hover=false;interaction.To(editor.Focused?1:0);};editor.Wheel=delta=>{if(scroll.Maximum>0)scroll.Value-=Math.Sign(delta)*Math.Max(1,SystemInformation.MouseWheelScrollLines);};editor.KeyUp+=(_,_)=>SyncScroll();scroll.WheelRequested=delta=>{if(scroll.Maximum>0)scroll.Value-=Math.Sign(delta)*Math.Max(1,SystemInformation.MouseWheelScrollLines);};scroll.ValueChanged+=(_,_)=>{if(!editor.IsHandleCreated)return;int first=(int)SendMessage(editor.Handle,0xCE,IntPtr.Zero,IntPtr.Zero);SendMessage(editor.Handle,0xB6,IntPtr.Zero,(IntPtr)(scroll.Value-first));};AccessibleRole=AccessibleRole.Text;TabStop=true;}
  [System.Diagnostics.CodeAnalysis.AllowNull] public override string Text{get=>editor.Text;set{editor.Text=value??"";}}
- public string PlaceholderText{get=>editor.PlaceholderText;set{editor.PlaceholderText=value;editor.AccessibleName=value;AccessibleName=value;}}
+ public string PlaceholderText{get=>editor.Hint;set{editor.Hint=value;editor.Invalidate();editor.AccessibleName=value;AccessibleName=value;}}
  public override Size GetPreferredSize(Size proposedSize)=>new(proposedSize.Width>0?proposedSize.Width:Width,Height);
  public bool UseSystemPasswordChar{get=>editor.UseSystemPasswordChar;set=>editor.UseSystemPasswordChar=value;}
  public bool Multiline{get=>editor.Multiline;set{editor.Multiline=value;editor.WordWrap=false;PerformLayout();}}
+ public bool WordWrap{get=>editor.WordWrap;set{editor.WordWrap=value;PerformLayout();SyncScroll();}}
  public bool ReadOnly{get=>editor.ReadOnly;set=>editor.ReadOnly=value;}
  
  ScrollBars scrollMode=ScrollBars.None;public ScrollBars ScrollBars{get=>scrollMode;set{scrollMode=value;SyncScroll();}}
@@ -39,7 +50,7 @@ sealed class ModernInput:UserControl {
  internal int ScrollMaximum=>scroll.Maximum;
  internal void ScrollToLine(int line)=>scroll.Value=line;
  public void SyncTheme(){editor.BackColor=Design.Surface;editor.ForeColor=Enabled?Design.Text:Design.Muted;editor.Font=Font;scroll.BackColor=Design.Surface;PerformLayout();Invalidate();}
- void SyncScroll(){if(!Multiline||ScrollBars==ScrollBars.None||!editor.IsHandleCreated){scroll.Visible=false;return;}int rows=Math.Max(1,editor.Height/Math.Max(1,editor.Font.Height));scroll.Viewport=rows;scroll.Maximum=Math.Max(0,editor.Lines.Length-rows);scroll.Value=(int)SendMessage(editor.Handle,0xCE,IntPtr.Zero,IntPtr.Zero);}
+ void SyncScroll(){if(!Multiline||ScrollBars==ScrollBars.None||!editor.IsHandleCreated){scroll.Visible=false;return;}int rows=Math.Max(1,editor.Height/Math.Max(1,editor.Font.Height));scroll.Viewport=rows;scroll.Maximum=Math.Max(0,(int)SendMessage(editor.Handle,0xBA,IntPtr.Zero,IntPtr.Zero)-rows);scroll.Value=(int)SendMessage(editor.Handle,0xCE,IntPtr.Zero,IntPtr.Zero);}
  protected override void OnLayout(LayoutEventArgs e){base.OnLayout(e);int pad=Design.Scale(this,12);editor.Bounds=new(pad,Multiline?pad:Math.Max(2,(Height-editor.PreferredHeight)/2),Math.Max(1,Width-pad*2-(Multiline?12:0)),Multiline?Math.Max(1,Height-pad*2):editor.PreferredHeight);scroll.Bounds=new(Width-16,pad,12,Math.Max(1,Height-pad*2));SyncScroll();}
  protected override void OnFontChanged(EventArgs e){base.OnFontChanged(e);if(editor!=null){editor.Font=Font;PerformLayout();SyncScroll();}}
  protected override void OnRightToLeftChanged(EventArgs e){base.OnRightToLeftChanged(e);if(editor!=null){editor.RightToLeft=RightToLeft;editor.TextAlign=HorizontalAlignment.Left;}}
