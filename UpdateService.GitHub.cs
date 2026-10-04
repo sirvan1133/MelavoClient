@@ -3,6 +3,22 @@ namespace MelavoClient;
 sealed record AppRelease(string Version,string Url,string Sha256,long Size);
 static partial class UpdateService {
  public const string AppRepository="sirvan1133/MelavoClient";
+ public static async Task<PackagePlan> PrepareOfficialPackage(string archive,CancellationToken cancellation=default){
+  string version;
+  using(var zip=System.IO.Compression.ZipFile.OpenRead(archive)){
+   var entry=zip.GetEntry("release.json")??throw new Exception("The update manifest is missing.");
+   if(entry.Length>50000)throw new Exception("The update manifest is too large.");
+   using var reader=new StreamReader(entry.Open());version=JsonNode.Parse(await reader.ReadToEndAsync(cancellation))?["version"]?.ToString()??"";
+  }
+  if(!Version.TryParse(version,out var available)||available<=Version.Parse(AppVersion))throw new Exception("Select a newer official Melavo release.");
+  using var http=Http();var json=JsonNode.Parse(await http.GetStringAsync($"https://api.github.com/repos/{AppRepository}/releases/tags/v{version}",cancellation))!.AsObject();
+  var release=ParseAppRelease(json)??throw new Exception("The package is not a published official Windows release.");
+  var digest=await Task.Run(()=>Hash(archive),cancellation);
+  if(!digest.Equals(release.Sha256,StringComparison.OrdinalIgnoreCase))throw new Exception("The selected ZIP does not match the official GitHub release.");
+  var plan=await Task.Run(()=>PreparePackage(archive),cancellation);
+  if(plan.Version!=release.Version)throw new Exception("The package version does not match the official release.");
+  return plan;
+ }
  public static AppRelease? ParseAppRelease(JsonObject release){
   if(release["draft"]?.GetValue<bool>()==true||release["prerelease"]?.GetValue<bool>()==true)return null;
   var version=release["tag_name"]?.ToString().TrimStart('v')??"";

@@ -5,6 +5,7 @@ sealed class GlassBorderOverlay:Control {
  readonly Card card;readonly GlassEdge edge;readonly Func<double> hover;
  Bitmap? material;bool materialDark;Size windowSize;Point position;
  public GlassBorderOverlay(Card owner,GlassEdge reflection,Func<double> emphasis){card=owner;edge=reflection;hover=emphasis;TabStop=false;Enabled=false;Visible=false;AccessibleRole=AccessibleRole.None;SetStyle(ControlStyles.UserPaint|ControlStyles.OptimizedDoubleBuffer|ControlStyles.AllPaintingInWmPaint,true);}
+ public void ResetMaterial(){material?.Dispose();material=null;Visible=Design.Glass;Fit();Invalidate();}
  public void Fit(){Bounds=card.ClientRectangle;if(Width<8||Height<8)return;int band=6;using var outside=Design.Round(new RectangleF(0,0,Width,Height),Design.RadiusCard);var ring=new Region(outside);if(Width>band*2&&Height>band*2){using var inside=Design.Round(new RectangleF(band,band,Width-band*2,Height-band*2),Math.Max(1,Design.RadiusCard-band));ring.Exclude(inside);}var previous=Region;Region=ring;previous?.Dispose();BringToFront();}
  protected override void OnPaintBackground(PaintEventArgs e){
   var form=FindForm();var currentWindow=form?.Size??Size;var currentPosition=IsHandleCreated?PointToScreen(Point.Empty):Location;

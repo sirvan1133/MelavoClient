@@ -58,7 +58,7 @@ static class GlassMaterial {
  public static void Title(Graphics g,Control control,bool separator=true){Surface(g,control);using var veil=new SolidBrush(Design.Dark?Color.FromArgb(105,5,12,27):Color.FromArgb(90,245,250,255));g.FillRectangle(veil,control.ClientRectangle);using var line=new Pen(Color.FromArgb(65,140,174,231));if(separator)g.DrawLine(line,0,control.Height-1,control.Width,control.Height-1);}
  public static void Input(Graphics g,Rectangle bounds,GraphicsPath shape,double focus){
   using var fill=new SolidBrush(Design.Surface);g.FillPath(fill,shape);
-  using var inner=new Pen(Color.FromArgb(Design.Dark?18:90,Color.White));
+  
   
  }
 }
