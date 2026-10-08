@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Drawing.Drawing2D;
 namespace MelavoClient;
 // Blur the shared decorative backdrop once, then composite that cached material.
@@ -16,21 +16,28 @@ static class GlassMaterial {
   EnsureScene();var cached=windows.GetValue(root,owner=>{var value=new WindowSurface();owner.Disposed+=(_,_)=>value.Dispose();return value;});
   if(cached.Ambient!=null&&cached.Size==root.Size&&cached.Dark==Design.Dark)return cached;
   cached.Dispose();cached.Size=root.Size;cached.Dark=Design.Dark;int width=Math.Max(1,root.Width)+36,height=Math.Max(1,root.Height)+36;
-  cached.Ambient=new Bitmap(width,height);using(var g=Graphics.FromImage(cached.Ambient))g.DrawImage(scene!,new Rectangle(0,0,width,height));
-  cached.Material=new Bitmap(width,height);using(var g=Graphics.FromImage(cached.Material)){g.DrawImage(blurred!,new Rectangle(0,0,width,height));using var tint=new SolidBrush(Design.Dark?Color.FromArgb(140,18,38,74):Color.FromArgb(192,250,252,255));g.FillRectangle(tint,new Rectangle(0,0,width,height));}
+  cached.Ambient=new Bitmap(width,height);using(var g=Graphics.FromImage(cached.Ambient))DrawCover(g,scene!,new Rectangle(0,0,width,height));
+  cached.Material=new Bitmap(width,height);using(var g=Graphics.FromImage(cached.Material)){DrawCover(g,blurred!,new Rectangle(0,0,width,height));using var tint=new SolidBrush(Design.Dark?Color.FromArgb(140,18,38,74):Color.FromArgb(192,250,252,255));g.FillRectangle(tint,new Rectangle(0,0,width,height));}
   return cached;
+ }
+ // Preserve the artwork's proportions; keep the globe on the left when cropping.
+ static void DrawCover(Graphics graphics,Image image,Rectangle destination){
+  float scale=Math.Max(destination.Width/(float)image.Width,destination.Height/(float)image.Height);
+  var source=new RectangleF(0,Math.Max(0,(image.Height-destination.Height/scale)/2),destination.Width/scale,destination.Height/scale);
+  graphics.InterpolationMode=InterpolationMode.HighQualityBicubic;
+  graphics.DrawImage(image,destination,source,GraphicsUnit.Pixel);
  }
  static void EnsureScene(){
   if(scene!=null&&sceneDark==Design.Dark)return;scene?.Dispose();blurred?.Dispose();sceneDark=Design.Dark;
-  scene=new Bitmap(1024,768);using(var g=Graphics.FromImage(scene)){
-   g.SmoothingMode=SmoothingMode.AntiAlias;using var fill=new LinearGradientBrush(new Rectangle(0,0,1024,768),Design.Dark?Color.FromArgb(7,13,27):Color.FromArgb(223,235,253),Design.Dark?Color.FromArgb(12,19,39):Color.FromArgb(239,240,253),55f);g.FillRectangle(fill,new Rectangle(0,0,1024,768));
-   void Glow(RectangleF bounds,Color color,int strength){using var path=new GraphicsPath();path.AddEllipse(bounds);using var brush=new PathGradientBrush(path){CenterColor=Color.FromArgb(strength,color),SurroundColors=new[]{Color.FromArgb(0,color)}};g.FillPath(brush,path);}
-   Glow(new RectangleF(-220,-310,1000,900),Color.FromArgb(34,126,240),Design.Dark?84:68);
-   Glow(new RectangleF(430,-80,900,860),Color.FromArgb(77,73,186),Design.Dark?65:46);
-   Glow(new RectangleF(-180,420,1100,780),Color.FromArgb(23,141,183),Design.Dark?41:35);
-   using var wave=new GraphicsPath();wave.AddBezier(-80,550,250,180,570,850,1100,230);using var light=new Pen(Color.FromArgb(Design.Dark?17:21,110,163,226),26){StartCap=LineCap.Round,EndCap=LineCap.Round};g.DrawPath(light,wave);
+  using var stream=typeof(GlassMaterial).Assembly.GetManifestResourceStream("MelavoClient.Assets.GlassWallpaper.jpg")??throw new InvalidOperationException("Wallpaper resource missing.");
+  using var artwork=Image.FromStream(stream);
+  int width=Math.Min(1536,artwork.Width),height=Math.Max(1,(int)Math.Round(width*artwork.Height/(double)artwork.Width));
+  scene=new Bitmap(width,height);
+  using(var graphics=Graphics.FromImage(scene)){
+   graphics.InterpolationMode=InterpolationMode.HighQualityBicubic;graphics.DrawImage(artwork,new Rectangle(0,0,width,height));
+   using var veil=new SolidBrush(Design.Dark?Color.FromArgb(36,7,15,38):Color.FromArgb(178,239,246,255));
+   graphics.FillRectangle(veil,new Rectangle(0,0,width,height));
   }
-  using(var stream=typeof(GlassMaterial).Assembly.GetManifestResourceStream("MelavoClient.Assets.GlassWallpaper.png"))if(stream!=null){using var artwork=Image.FromStream(stream);using var graphics=Graphics.FromImage(scene);graphics.DrawImage(artwork,new Rectangle(0,0,scene.Width,scene.Height));if(Design.Dark){using var calm=new SolidBrush(Color.FromArgb(100,7,15,38));graphics.FillRectangle(calm,new Rectangle(0,0,scene.Width,scene.Height));}if(!Design.Dark){using var veil=new SolidBrush(Color.FromArgb(178,239,246,255));graphics.FillRectangle(veil,new Rectangle(0,0,scene.Width,scene.Height));}}
   blurred=BackdropBlur.Create(scene,7);BlurBuilds++;
  }
  static (Control Root,Point Offset) Coordinates(Control control){var offset=Point.Empty;Control root=control;while(root.Parent!=null){offset.Offset(root.Left,root.Top);root=root.Parent;}return(root,offset);}
