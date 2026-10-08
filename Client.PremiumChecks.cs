@@ -1,10 +1,12 @@
-namespace MelavoClient;
+﻿namespace MelavoClient;
 sealed partial class Client {
  static void CheckPremiumRendering(Action<bool,string> assert){
   void Pump(int milliseconds){var watch=System.Diagnostics.Stopwatch.StartNew();while(watch.ElapsedMilliseconds<milliseconds){Application.DoEvents();Thread.Sleep(5);}}
   Design.Glass=true;Design.Dark=true;GlassAnimation.ReducedMotionOverride=false;GlassAnimation.Capture=false;
   using var host=new Form{ShowInTaskbar=false,Size=new(600,360)};using var card=new Card{Bounds=new(20,20,500,260)};var label=Design.Label("125 KB/s",12);label.AutoSize=false;label.Bounds=new(90,90,180,40);card.Controls.Add(label);host.Controls.Add(card);host.Show();Pump(1100);
-  int paints=0;label.Paint+=(_,_)=>paints++;var phase=card.ReflectionPhase;int blurBuilds=GlassMaterial.BlurBuilds;using var process=System.Diagnostics.Process.GetCurrentProcess();var before=process.TotalProcessorTime;Pump(550);var consumed=process.TotalProcessorTime-before;
+  int paints=0;label.Paint+=(_,_)=>paints++;var phase=card.ReflectionPhase;int blurBuilds=GlassMaterial.BlurBuilds;using var process=System.Diagnostics.Process.GetCurrentProcess();var before=process.TotalProcessorTime;
+  byte[] Wallpaper(){using var bitmap=new Bitmap(host.Width,host.Height);using(var graphics=Graphics.FromImage(bitmap))GlassMaterial.Ambient(graphics,host);using var bytes=new MemoryStream();bitmap.Save(bytes,System.Drawing.Imaging.ImageFormat.Png);return bytes.ToArray();}
+  var background=Wallpaper();Pump(550);assert(background.SequenceEqual(Wallpaper()),"wallpaper does not move between repaints while card reflections animate");var consumed=process.TotalProcessorTime-before;
   assert(card.ReflectionPhase!=phase,"specular reflection travels continuously");assert(paints==0,"border animation does not repaint traffic text");assert(card.ReflectionFrameBuilds==0,"reflection retains no bitmap frames");assert(GlassMaterial.BlurBuilds==blurBuilds,"animation does not rebuild backdrop blur");
   var overlay=card.Controls.OfType<GlassBorderOverlay>().Single();assert(overlay.Region!=null&&!overlay.Region.IsVisible(card.Width/2,card.Height/2),"animation surface excludes card content");
   using(var darkImage=new Bitmap(overlay.Width,overlay.Height)){overlay.DrawToBitmap(darkImage,overlay.ClientRectangle);Design.Dark=false;card.SyncMaterial();using var lightImage=new Bitmap(overlay.Width,overlay.Height);overlay.DrawToBitmap(lightImage,overlay.ClientRectangle);assert(lightImage.GetPixel(overlay.Width/2,2).GetBrightness()>darkImage.GetPixel(overlay.Width/2,2).GetBrightness(),"theme change replaces cached border material");Design.Glass=false;card.SyncMaterial();assert(!overlay.Visible,"classic theme removes glass overlay immediately");Design.Glass=true;Design.Dark=true;card.SyncMaterial();assert(overlay.Visible,"glass theme restores overlay immediately");}

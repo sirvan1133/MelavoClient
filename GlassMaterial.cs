@@ -1,11 +1,10 @@
-﻿using System.Diagnostics;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 namespace MelavoClient;
 // Blur the shared decorative backdrop once, then composite that cached material.
 // No window capture, text blur, or convolution runs on the animation timer.
 static class GlassMaterial {
- static Bitmap? scene,blurred;static bool sceneDark;static readonly Stopwatch time=Stopwatch.StartNew();
- public static double Seconds=>time.Elapsed.TotalSeconds;
+ static Bitmap? scene,blurred;static bool sceneDark;
  public static int BlurBuilds{get;private set;}
  sealed class WindowSurface:IDisposable {
   public Bitmap? Ambient,Material;public Size Size;public bool Dark;
@@ -27,22 +26,30 @@ static class GlassMaterial {
   graphics.InterpolationMode=InterpolationMode.HighQualityBicubic;
   graphics.DrawImage(image,destination,source,GraphicsUnit.Pixel);
  }
+ // Percentage controls how much softened detail is mixed into the original artwork.
+ static Bitmap Softened(Bitmap original,int radius,float amount){
+  using var filtered=BackdropBlur.Create(original,radius);var result=new Bitmap(original.Width,original.Height);
+  using var graphics=Graphics.FromImage(result);graphics.DrawImageUnscaled(original,0,0);
+  using var attributes=new ImageAttributes();attributes.SetColorMatrix(new ColorMatrix{Matrix33=amount});
+  graphics.DrawImage(filtered,new Rectangle(0,0,result.Width,result.Height),0,0,filtered.Width,filtered.Height,GraphicsUnit.Pixel,attributes);
+  return result;
+ }
  static void EnsureScene(){
   if(scene!=null&&sceneDark==Design.Dark)return;scene?.Dispose();blurred?.Dispose();sceneDark=Design.Dark;
   using var stream=typeof(GlassMaterial).Assembly.GetManifestResourceStream("MelavoClient.Assets.GlassWallpaper.jpg")??throw new InvalidOperationException("Wallpaper resource missing.");
   using var artwork=Image.FromStream(stream);
   int width=Math.Min(1536,artwork.Width),height=Math.Max(1,(int)Math.Round(width*artwork.Height/(double)artwork.Width));
-  scene=new Bitmap(width,height);
-  using(var graphics=Graphics.FromImage(scene)){
+  using var artworkScene=new Bitmap(width,height);
+  using(var graphics=Graphics.FromImage(artworkScene)){
    graphics.InterpolationMode=InterpolationMode.HighQualityBicubic;graphics.DrawImage(artwork,new Rectangle(0,0,width,height));
-   using var veil=new SolidBrush(Design.Dark?Color.FromArgb(36,7,15,38):Color.FromArgb(178,239,246,255));
+   using var veil=new SolidBrush(Design.Dark?Color.FromArgb(64,7,15,38):Color.FromArgb(178,239,246,255));
    graphics.FillRectangle(veil,new Rectangle(0,0,width,height));
   }
-  blurred=BackdropBlur.Create(scene,7);BlurBuilds++;
+  scene=Softened(artworkScene,5,.05f);blurred=BackdropBlur.Create(artworkScene,15);BlurBuilds++;
  }
  static (Control Root,Point Offset) Coordinates(Control control){var offset=Point.Empty;Control root=control;while(root.Parent!=null){offset.Offset(root.Left,root.Top);root=root.Parent;}return(root,offset);}
  public static void Ambient(Graphics g,Control control){
-  var (root,offset)=Coordinates(control);var cached=ForWindow(root);int drift=(int)(Math.Sin(Seconds*Math.PI/12)*9);g.DrawImageUnscaled(cached.Ambient!,-offset.X-18+drift,-offset.Y-18);
+  var (root,offset)=Coordinates(control);var cached=ForWindow(root);g.DrawImageUnscaled(cached.Ambient!,-offset.X-18,-offset.Y-18);
  }
  public static void Surface(Graphics g,Control control){
   var (root,offset)=Coordinates(control);var cached=ForWindow(root);g.DrawImageUnscaled(cached.Material!,-offset.X-18,-offset.Y-18);
@@ -50,7 +57,7 @@ static class GlassMaterial {
  public static void Backdrop(Graphics g,Control control){
   if(control.FindForm() is Form dialog && dialog is not Client){Control? parent=control.Parent;while(parent!=null&&parent.BackColor.A!=255)parent=parent.Parent;g.Clear(parent?.BackColor??dialog.BackColor);return;}
   var offset=Point.Empty;Control? ancestor=control;while(ancestor!=null&&ancestor is not Card){offset.Offset(ancestor.Left,ancestor.Top);ancestor=ancestor.Parent;}
-  if(ancestor is Card card){Surface(g,control);Finish(g,control,new Rectangle(-offset.X,-offset.Y,Math.Max(1,card.Width),Math.Max(1,card.Height)));}else Ambient(g,control);
+  if(ancestor is Card card){Surface(g,control);Finish(g,control,new Rectangle(-offset.X,-offset.Y,Math.Max(1,card.Width),Math.Max(1,card.Height)));}else{Ambient(g,control);if(control is ModernButton){var saved=g.Save();using var shape=Design.Round(new RectangleF(1,1,control.Width-2,control.Height-2),Design.RadiusInput);g.SetClip(shape,CombineMode.Intersect);Surface(g,control);g.Restore(saved);}}
  }
  static void Finish(Graphics g,Control control,Rectangle bounds){
   using var highlight=new LinearGradientBrush(bounds,Color.FromArgb(Design.Dark?12:35,164,192,255),Color.FromArgb(0,255,255,255),110f);g.FillRectangle(highlight,control.ClientRectangle);
