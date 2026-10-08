@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Security.Cryptography;
@@ -6,6 +6,8 @@ using System.Text;
 using System.Text.Json.Nodes;
 namespace MelavoClient;
 sealed partial class Client {
+ readonly Label creatorCredit=Design.Label("",8,true);
+ readonly LinkLabel creatorLink=new(){Text="github.com/sirvan1133",AutoSize=false,Dock=DockStyle.Fill,TextAlign=ContentAlignment.MiddleCenter,RightToLeft=RightToLeft.No,LinkBehavior=LinkBehavior.HoverUnderline,Font=Design.Font(8),Margin=Padding.Empty,TabStop=true,AccessibleName="GitHub: sirvan1133"};
  ModernButton? favoriteAction,pingAction,pingAllAction,publicIpAction;
  readonly UiPreferences preferences=UiPreferences.Read();
  readonly Dictionary<string,Panel> pages=new();readonly Dictionary<string,ModernButton> navigation=new();
@@ -20,12 +22,17 @@ sealed partial class Client {
  Panel? pageHost;string currentPage="Home";ConnectionState visualState;DateTime? connectedAt;long lastRx,lastTx,totalRx,totalTx;bool sampled,disconnecting;string? activeProfileKey;float animation;DateTime sampleAt;DateTime pageTransition;
  void BuildShell(){
   using(var iconStream=typeof(Client).Assembly.GetManifestResourceStream("MelavoClient.Assets.Melavo.ico")){if(iconStream!=null){Icon=new Icon(iconStream);tray.Icon=Icon;}}
-  Design.Glass=preferences.VisualStyle=="glass";Design.Dark=preferences.Dark;Text="Melavo VPN · 0.8.10"+(SubscriptionStore.Edition=="customer"?" · Customer":"");Font=Design.Font();BackColor=Design.Canvas;ForeColor=Design.Text;RightToLeft=RightToLeft.Yes;Size=new(1380,1120);FormBorderStyle=FormBorderStyle.None;MaximizeBox=true;MinimizeBox=true;StartPosition=FormStartPosition.CenterScreen;
+  Design.Glass=preferences.VisualStyle=="glass";Design.Dark=preferences.Dark;Text="Melavo VPN · 0.8.11"+(SubscriptionStore.Edition=="customer"?" · Customer":"");Font=Design.Font();BackColor=Design.Canvas;ForeColor=Design.Text;RightToLeft=RightToLeft.Yes;Size=new(1380,1120);FormBorderStyle=FormBorderStyle.None;MaximizeBox=true;MinimizeBox=true;StartPosition=FormStartPosition.CenterScreen;
   var shell=new BufferedTable{Dock=DockStyle.Fill,ColumnCount=2,RowCount=1,Padding=new(18,12,18,18),RightToLeft=RightToLeft.No};shell.ColumnStyles.Add(new(SizeType.Percent,100));shell.ColumnStyles.Add(new(SizeType.Absolute,212));Controls.Add(shell);Padding=new(0,48,0,0);titleBar=new WindowTitleBar(this){Dock=DockStyle.None,Bounds=new Rectangle(0,0,ClientSize.Width,48),Anchor=AnchorStyles.Top|AnchorStyles.Left|AnchorStyles.Right};Controls.Add(titleBar);titleBar.BringToFront();
   var sidebar=new Card{RightToLeft=RightToLeft.Yes,Dock=DockStyle.Fill,Padding=new(18,22,18,18),BackColor=Design.Surface};shell.Controls.Add(sidebar,1,0);
   var nav=new BufferedFlow{Dock=DockStyle.Top,AutoSize=true,FlowDirection=FlowDirection.TopDown,WrapContents=false};nav.Controls.Add(new BrandLockup{Margin=new(0,0,0,20)});
   foreach(var item in new[]{("Home","◉  خانه"),("Settings","⚙  تنظیمات"),("About","ⓘ  درباره")}){var button=new ModernButton{Text=item.Item2[3..],IconGlyph=item.Item1 switch{"Home"=>"\uE80F","Servers"=>"\uE774","Subscription"=>"\uE8A5","Statistics"=>"\uE9D9","Settings"=>"\uE713",_=>"\uE946"},Width=176,Height=44,Margin=new(0,8,0,0),AccessibleName=item.Item1,Kind=ButtonKind.Ghost,RightToLeft=RightToLeft.Yes};var key=item.Item1;button.Click+=(_,_)=>Navigate(key);navigation[key]=button;nav.Controls.Add(button);}sidebar.Controls.Add(nav);
-  var foot=Design.Label("VERSION 0.8.10\nXray + sing-box",7,true);foot.Dock=DockStyle.Bottom;foot.Height=46;sidebar.Controls.Add(foot);
+  var foot=Design.Label("VERSION 0.8.11\nXray + sing-box",7,true);foot.Dock=DockStyle.Fill;foot.AutoSize=false;foot.TextAlign=ContentAlignment.MiddleCenter;foot.Margin=Padding.Empty;
+  var brandingFooter=new BufferedTable{Dock=DockStyle.Bottom,Height=100,ColumnCount=1,RowCount=3,Margin=Padding.Empty};foreach(var height in new[]{46,28,26})brandingFooter.RowStyles.Add(new(SizeType.Absolute,height));
+  creatorCredit.Dock=DockStyle.Fill;creatorCredit.AutoSize=false;creatorCredit.Margin=Padding.Empty;creatorCredit.TextAlign=ContentAlignment.MiddleCenter;
+  creatorLink.ForeColorChanged+=(_,_)=>{creatorLink.LinkColor=Design.Muted;creatorLink.ActiveLinkColor=Design.Accent;creatorLink.VisitedLinkColor=Design.Muted;creatorLink.RightToLeft=RightToLeft.No;};
+  creatorLink.Links.Add(0,creatorLink.Text.Length,"https://github.com/sirvan1133");creatorLink.LinkClicked+=(_,_)=>{try{Process.Start(new ProcessStartInfo("https://github.com/sirvan1133"){UseShellExecute=true});}catch(Exception e){status.Text=SafeError(e.Message);}};
+  brandingFooter.Controls.Add(foot,0,0);brandingFooter.Controls.Add(creatorCredit,0,1);brandingFooter.Controls.Add(creatorLink,0,2);sidebar.Controls.Add(brandingFooter);
   pageHost=new BufferedPanel{RightToLeft=RightToLeft.Yes,Dock=DockStyle.Fill,Padding=new(24,12,10,10)};shell.Controls.Add(pageHost,0,0);
   InitializeServerControls();BuildHome();BuildSettings();BuildAbout();
   var footer=new Panel{Dock=DockStyle.Bottom,Height=40,Padding=new(12,8,12,0)};status.Font=Design.Font(9);status.ForeColor=Design.Muted;footer.Controls.Add(status);pageHost.Controls.Add(footer);footer.BringToFront();

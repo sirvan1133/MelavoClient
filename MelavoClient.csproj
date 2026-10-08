@@ -1,10 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
-    <Version>0.8.10</Version>
+    <Version>0.8.11</Version>
     <DefineConstants Condition="'$(CustomerEdition)' == 'true'">$(DefineConstants);CUSTOMER_EDITION</DefineConstants>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>

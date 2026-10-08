@@ -25,7 +25,8 @@ sealed partial class Client {
   groups.PlaceholderText=L("Select a subscription","انتخاب ساب");search.PlaceholderText=L("Search servers…","جستجوی سرورها…");search.RightToLeft=RightToLeft;
   int selected=filter.SelectedIndex;filter.Items.Clear();filter.Items.AddRange(Fa?new object[]{"همهٔ سرورها","علاقه‌مندی‌ها","اخیراً استفاده‌شده"}:new object[]{"All servers","Favorites","Recently used"});filter.SelectedIndex=selected;filter.Invalidate();
   string[] headings=Fa?new[]{"سرور","کشور","پروتکل","پینگ","وضعیت","بار","★"}:new[]{"Server","Country","Protocol","Ping","Status","Load","★"};for(int i=0;i<servers.Columns.Count;i++)servers.Columns[i].Text=headings[i];servers.EmptyText=L("No servers found","سروری پیدا نشد");
-  TranslateTree(this);ApplyTheme(this);FillServers();SyncConfigScope();SetControls();
+  creatorCredit.Text=L("Made with love ♥","ساخته‌شده با عشق ♥");creatorCredit.RightToLeft=RightToLeft;creatorLink.RightToLeft=RightToLeft.No;
+  TranslateTree(this);ApplyTheme(this);creatorLink.LinkColor=Design.Muted;creatorLink.ActiveLinkColor=Design.Accent;creatorLink.VisitedLinkColor=Design.Muted;FillServers();SyncConfigScope();SetControls();
   editSubscription.Text=L("Edit subscription","ویرایش ساب");subscriptionsTab.Text=L("Subscriptions","ساب‌ها");singleConfigsTab.Text=L("Single configurations","کانفیگ‌های تکی");shareConfig.Text=L("Share","اشتراک‌گذاری");
   if(tray.ContextMenuStrip!=null){var captions=Fa?new[]{"بازکردن","قطع اتصال","خروج"}:new[]{"Open","Disconnect","Exit"};for(int i=0;i<Math.Min(captions.Length,tray.ContextMenuStrip.Items.Count);i++)tray.ContextMenuStrip.Items[i].Text=captions[i];}
  }
