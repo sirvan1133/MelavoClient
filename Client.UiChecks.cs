@@ -1,5 +1,21 @@
 ﻿namespace MelavoClient;
 sealed partial class Client {
+
+ static void CheckSubscriptionActionBounds(Client client,Action<bool,string> assert){
+  client.Opacity=0;client.ShowInTaskbar=false;client.Show();client.Navigate("Home");Application.DoEvents();
+  foreach(var language in new[]{"en","fa"})foreach(var size in new[]{new Size(1380,1120),new Size(1240,780),new Size(1380,780)}){
+   client.preferences.Language=language;client.ApplyLanguage();client.Size=size;client.PerformLayout();Application.DoEvents();
+   foreach(var button in new[]{client.manageSubscription,client.refresh,client.editSubscription,client.deleteSubscription}){
+    var bounds=button.RectangleToScreen(button.ClientRectangle);
+    for(Control? parent=button.Parent;parent!=null&&parent is not Client;parent=parent.Parent){
+     var interior=new Rectangle(parent.Padding.Left,parent.Padding.Top,parent.ClientSize.Width-parent.Padding.Horizontal,parent.ClientSize.Height-parent.Padding.Vertical);
+     assert(parent.RectangleToScreen(interior).Contains(bounds),$"subscription action {button.Text} stays inside {parent.GetType().Name} at {size.Width}x{size.Height} ({language}): button={bounds}; parent={parent.RectangleToScreen(interior)}");
+    }
+    assert(button.Height>=36,"subscription action keeps usable height");
+   }
+  }
+  client.preferences.Language="en";client.ApplyLanguage();client.Size=new(1380,1120);
+ }
  static void CheckConfigurationMenu(Action<bool,string> assert){
   void Pump(int ms){var clock=System.Diagnostics.Stopwatch.StartNew();while(clock.ElapsedMilliseconds<ms){Application.DoEvents();Thread.Sleep(5);}}
   using var host=new Form{ShowInTaskbar=false,Size=new(500,500)};host.Show();using var menu=new ConfigurationMenu();int invoked=0;foreach(var glyph in new[]{"\uE72D","\uE70F","\uE74D","\uE9D9","\uE768"})menu.AddAction(glyph,()=>invoked++);
@@ -49,6 +65,7 @@ sealed partial class Client {
   Assert(TextRenderer.MeasureText("All servers",client.filter.Font).Width+46<=client.filter.Width,"minimum window filter caption fits");
   Assert(TextRenderer.MeasureText(client.search.PlaceholderText,client.search.Font).Width+24<=client.search.Width,"minimum window search hint fits");
   using(var edit=client.CreateEditSubscriptionDialog(client.subscriptions.First(IsSubscription))){edit.Show(client);Application.DoEvents();var save=edit.Controls[0].Controls.OfType<ModernButton>().Single();Assert(save.Height<=44&&save.Height>=34,"edit subscription save has standard height");edit.Close();}
+  CheckSubscriptionActionBounds(client,Assert);
   client.job.Dispose();File.WriteAllText(Path.Combine(AppContext.BaseDirectory,"ui-checks.txt"),"PASS: navigation, search, favorites, active-server dashboard, enabled connected/connecting browsing, scroll preservation with 100 rows, upward/downward scroll, continuous traffic colors (1000 steps) in both themes, custom controls, English/Persian directions, smooth fractional scroll, stable active name, input geometry, connection/error states, account metadata, light/dark palettes. Preview fixtures only; no network or real subscription writes.");return 0;
  }
 }
