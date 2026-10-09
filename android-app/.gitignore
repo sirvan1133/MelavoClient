@@ -1,0 +1,15 @@
+.gradle/
+**/build/
+local.properties
+*.jks
+*.keystore
+app/libs/classes.jar
+app/libs/libv2ray-sources.jar
+
+app/libs/libv2ray.aar
+node_modules/
+
+hs_err_pid*.log
+*.hprof
+
+replay_pid*.log

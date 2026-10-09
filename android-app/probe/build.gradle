@@ -1,0 +1,2 @@
+plugins { id 'com.android.application' }
+android { namespace 'org.melavo.probe'; compileSdk 36; defaultConfig { applicationId 'org.melavo.probe'; minSdk 24; targetSdk 36; versionCode 1; versionName '1' } }

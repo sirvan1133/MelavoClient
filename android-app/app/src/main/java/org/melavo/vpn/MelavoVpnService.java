@@ -1,0 +1,26 @@
+package org.melavo.vpn;
+import android.app.*;
+import android.content.*;
+import android.net.VpnService;
+import android.os.*;
+import org.json.*;
+import java.util.concurrent.*;
+import libv2ray.*;
+
+public final class MelavoVpnService extends VpnService {
+ static volatile boolean running,connecting;static volatile String error="",activeId="",publicIp="—";static volatile long started,download,upload,totalDownload,totalUpload;
+ private android.os.ParcelFileDescriptor tunnel;private CoreController core;private final ExecutorService executor=Executors.newSingleThreadExecutor();private long lastSample;private ScheduledExecutorService samples;private final ExecutorService network=Executors.newSingleThreadExecutor();
+ @Override public int onStartCommand(Intent intent,int flags,int id){if(intent==null){stopSelf();return START_NOT_STICKY;}if("stop".equals(intent.getAction())){executor.execute(this::stopTunnel);return START_NOT_STICKY;}if(connecting)return START_NOT_STICKY;if(running){String requested=intent.getStringExtra("nodeId");if(requested!=null&&!requested.equals(activeId)){executor.execute(()->{stopTunnel(false);connecting=true;error="";activeId=requested;showForeground();startTunnel(requested);});}return START_NOT_STICKY;}connecting=true;error="";activeId=intent.getStringExtra("nodeId");showForeground();executor.execute(()->startTunnel(activeId));return START_NOT_STICKY;}
+ private void showForeground(){boolean fa=false;try{fa=new SecureStore(this).preferences().optString("language","en").equals("fa");}catch(Exception ignored){}NotificationManager manager=(NotificationManager)getSystemService(NOTIFICATION_SERVICE);if(Build.VERSION.SDK_INT>=26)manager.createNotificationChannel(new NotificationChannel("vpn","Melavo VPN",NotificationManager.IMPORTANCE_LOW));Intent stop=new Intent(this,MelavoVpnService.class).setAction("stop");PendingIntent stopAction=PendingIntent.getService(this,2,stop,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);PendingIntent open=PendingIntent.getActivity(this,1,new Intent(this,MainActivity.class),PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);Notification.Builder n=Build.VERSION.SDK_INT>=26?new Notification.Builder(this,"vpn"):new Notification.Builder(this);n.setSmallIcon(R.drawable.ic_melavo).setContentTitle("Melavo VPN").setContentText(fa?(running?"VPN متصل است":"راه‌اندازی VPN…"):(running?"VPN active":"Starting VPN…")).setContentIntent(open).setOngoing(true).addAction(new Notification.Action.Builder(null,fa?"قطع اتصال":"Disconnect",stopAction).build());startForeground(1,n.build());}
+ private void startTunnel(String id){try{
+  go.Seq.setContext(getApplicationContext());SecureStore store=new SecureStore(this);JSONObject config=store.node(id).getJSONObject("config");Libv2ray.initCoreEnv(getFilesDir().getAbsolutePath(),"");
+  Builder builder=new Builder().setSession("Melavo VPN").setMtu(1500).addAddress("172.29.0.1",30).addAddress("fdfe:dcba:9876::1",126).addRoute("0.0.0.0",0).addRoute("::",0).addDnsServer("1.1.1.1");builder.addDisallowedApplication(getPackageName());if(Build.VERSION.SDK_INT>=29)builder.setMetered(false);tunnel=builder.establish();if(tunnel==null)throw new Exception("VPN permission was not granted");
+  core=Libv2ray.newCoreController(new CoreCallbackHandler(){public long startup(){return 0;}public long shutdown(){return 0;}public long onEmitStatus(long status,String text){return 0;}});
+  core.startLoop(ConfigCodec.prepare(config).toString(),tunnel.getFd());running=core.getIsRunning();if(!running)throw new Exception("VPN core did not start");connecting=false;showForeground();started=android.os.SystemClock.elapsedRealtime();totalDownload=totalUpload=0;samples=Executors.newSingleThreadScheduledExecutor();lastSample=android.os.SystemClock.elapsedRealtime();samples.scheduleWithFixedDelay(this::sample,1,1,TimeUnit.SECONDS);network.execute(()->{try{String address=MainActivity.fetchProxyIp();if(running&&activeId.equals(id))publicIp=address;}catch(Exception ignored){if(running&&activeId.equals(id))publicIp="Unavailable";}});
+ }catch(Exception e){error=e.getMessage()==null?"VPN failed":e.getMessage();stopTunnel();}}
+ private void sample(){try{long down=0,up=0;String value=core.queryAllOutboundTrafficStats();for(String stat:value.split(";")){String[] p=stat.split(",");if(p.length==3&&!p[0].equals("direct")){long bytes=Long.parseLong(p[2]);if(p[1].equals("downlink"))down+=bytes;else if(p[1].equals("uplink"))up+=bytes;}}long now=android.os.SystemClock.elapsedRealtime(),elapsed=Math.max(1,now-lastSample);lastSample=now;download=down*1000/elapsed;upload=up*1000/elapsed;totalDownload+=down;totalUpload+=up;}catch(Exception ignored){}}
+ private void stopTunnel(){stopTunnel(true);}
+ private void stopTunnel(boolean terminate){running=connecting=false;if(samples!=null){samples.shutdownNow();samples=null;}try{if(core!=null)core.stopLoop();}catch(Exception ignored){}core=null;try{if(tunnel!=null)tunnel.close();}catch(Exception ignored){}tunnel=null;download=upload=totalDownload=totalUpload=started=0;publicIp="—";activeId="";if(terminate){stopForeground(true);stopSelf();}}
+ @Override public void onRevoke(){executor.execute(this::stopTunnel);}
+ @Override public void onDestroy(){stopTunnel();executor.shutdownNow();network.shutdownNow();super.onDestroy();}
+}
