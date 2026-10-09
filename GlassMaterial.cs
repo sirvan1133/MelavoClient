@@ -16,7 +16,7 @@ static class GlassMaterial {
   if(cached.Ambient!=null&&cached.Size==root.Size&&cached.Dark==Design.Dark)return cached;
   cached.Dispose();cached.Size=root.Size;cached.Dark=Design.Dark;int width=Math.Max(1,root.Width)+36,height=Math.Max(1,root.Height)+36;
   cached.Ambient=new Bitmap(width,height);using(var g=Graphics.FromImage(cached.Ambient))DrawCover(g,scene!,new Rectangle(0,0,width,height));
-  cached.Material=new Bitmap(width,height);using(var g=Graphics.FromImage(cached.Material)){DrawCover(g,blurred!,new Rectangle(0,0,width,height));using var tint=new SolidBrush(Design.Dark?Color.FromArgb(140,18,38,74):Color.FromArgb(192,250,252,255));g.FillRectangle(tint,new Rectangle(0,0,width,height));}
+  cached.Material=new Bitmap(width,height);using(var g=Graphics.FromImage(cached.Material)){DrawCover(g,blurred!,new Rectangle(0,0,width,height));using var tint=new SolidBrush(Design.Dark?Color.FromArgb(70,18,27,52):Color.FromArgb(155,250,252,255));g.FillRectangle(tint,new Rectangle(0,0,width,height));}
   return cached;
  }
  // Preserve the artwork's proportions; keep the globe on the left when cropping.
@@ -36,14 +36,16 @@ static class GlassMaterial {
  }
  static void EnsureScene(){
   if(scene!=null&&sceneDark==Design.Dark)return;scene?.Dispose();blurred?.Dispose();sceneDark=Design.Dark;
-  using var stream=typeof(GlassMaterial).Assembly.GetManifestResourceStream("MelavoClient.Assets.GlassWallpaper.jpg")??throw new InvalidOperationException("Wallpaper resource missing.");
-  using var artwork=Image.FromStream(stream);
-  int width=Math.Min(1536,artwork.Width),height=Math.Max(1,(int)Math.Round(width*artwork.Height/(double)artwork.Width));
+  const int width=1536,height=960;
   using var artworkScene=new Bitmap(width,height);
   using(var graphics=Graphics.FromImage(artworkScene)){
-   graphics.InterpolationMode=InterpolationMode.HighQualityBicubic;graphics.DrawImage(artwork,new Rectangle(0,0,width,height));
-   using var veil=new SolidBrush(Design.Dark?Color.FromArgb(64,7,15,38):Color.FromArgb(178,239,246,255));
-   graphics.FillRectangle(veil,new Rectangle(0,0,width,height));
+   graphics.SmoothingMode=SmoothingMode.AntiAlias;
+   using var ground=new LinearGradientBrush(new Rectangle(0,0,width,height),Design.Dark?Color.FromArgb(7,16,43):Color.FromArgb(226,237,255),Design.Dark?Color.FromArgb(5,10,30):Color.FromArgb(245,243,255),160f);
+   graphics.FillRectangle(ground,0,0,width,height);
+   void Wash(RectangleF bounds,Color color){using var path=new GraphicsPath();path.AddEllipse(bounds);using var brush=new PathGradientBrush(path){CenterColor=color,SurroundColors=new[]{Color.FromArgb(0,color)}};graphics.FillPath(brush,path);}
+   Wash(new RectangleF(-500,-460,1700,1250),Color.FromArgb(Design.Dark?90:40,40,100,220));
+   Wash(new RectangleF(700,380,1450,1250),Color.FromArgb(Design.Dark?70:32,110,70,230));
+   Wash(new RectangleF(-150,430,1500,220),Color.FromArgb(Design.Dark?24:14,80,170,255));
   }
   scene=Softened(artworkScene,5,.05f);blurred=BackdropBlur.Create(artworkScene,15);BlurBuilds++;
  }
@@ -60,7 +62,7 @@ static class GlassMaterial {
   if(ancestor is Card card){Surface(g,control);Finish(g,control,new Rectangle(-offset.X,-offset.Y,Math.Max(1,card.Width),Math.Max(1,card.Height)));}else{Ambient(g,control);if(control is ModernButton){var saved=g.Save();using var shape=Design.Round(new RectangleF(1,1,control.Width-2,control.Height-2),Design.RadiusInput);g.SetClip(shape,CombineMode.Intersect);Surface(g,control);g.Restore(saved);}}
  }
  static void Finish(Graphics g,Control control,Rectangle bounds){
-  using var highlight=new LinearGradientBrush(bounds,Color.FromArgb(Design.Dark?12:35,164,192,255),Color.FromArgb(0,255,255,255),110f);g.FillRectangle(highlight,control.ClientRectangle);
+  using var highlight=new LinearGradientBrush(bounds,Color.FromArgb(Design.Dark?20:35,255,255,255),Color.FromArgb(0,255,255,255),110f);g.FillRectangle(highlight,control.ClientRectangle);
   using var shadow=new LinearGradientBrush(bounds,Color.Transparent,Color.FromArgb(Design.Dark?13:5,0,3,14),90f);g.FillRectangle(shadow,control.ClientRectangle);
  }
  public static void PaintCard(Graphics g,Control control){

@@ -13,12 +13,13 @@ static class MelavoBrand {
  }
 }
 sealed class BrandLockup:Control {
- public BrandLockup(){DoubleBuffered=true;AccessibleName="Melavo VPN";Size=new(176,134);TabStop=false;}
+ public BrandLockup(){DoubleBuffered=true;AccessibleName="Melavo VPN";Size=new(176,70);TabStop=false;}
  protected override void OnPaint(PaintEventArgs e){
-  Design.PaintBackdrop(e.Graphics,this);MelavoBrand.Mark(e.Graphics,new RectangleF((Width-42)/2f,3,42,42));
-  using var brandFont=Design.Font(16,FontStyle.Bold);using var name=Design.FitFont("Melavo",brandFont,new Size(Width-12,54));using var caption=Design.Font(7);
-  TextRenderer.DrawText(e.Graphics,"Melavo",name,new Rectangle(0,48,Width,54),Design.Text,TextFormatFlags.HorizontalCenter|TextFormatFlags.VerticalCenter);
-  TextRenderer.DrawText(e.Graphics,"WINDOWS VPN",caption,new Rectangle(0,104,Width,26),Design.Muted,TextFormatFlags.HorizontalCenter|TextFormatFlags.VerticalCenter);
+  Design.PaintBackdrop(e.Graphics,this);MelavoBrand.Mark(e.Graphics,new RectangleF(2,12,40,40));
+  using var name=Design.Font(13,FontStyle.Bold);using var caption=Design.Font(7);
+  TextRenderer.DrawText(e.Graphics,"Melavo",name,new Rectangle(54,8,Width-54,32),Design.Text,TextFormatFlags.Left|TextFormatFlags.VerticalCenter);
+  TextRenderer.DrawText(e.Graphics,"WINDOWS VPN",caption,new Rectangle(54,38,Width-54,20),Design.Muted,TextFormatFlags.Left|TextFormatFlags.VerticalCenter);
+
  }
 }
 

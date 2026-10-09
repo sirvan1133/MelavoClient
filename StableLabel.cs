@@ -1,8 +1,10 @@
 namespace MelavoClient;
 sealed class StableLabel:Label {
+ public bool Wrap{get;set;}
  public string? IconGlyph{get;set;}
  public StableLabel(){SetStyle(ControlStyles.OptimizedDoubleBuffer|ControlStyles.AllPaintingInWmPaint,true);}
  protected override void OnPaint(PaintEventArgs e){
+  if(Wrap){TextRenderer.DrawText(e.Graphics,Text,Font,ClientRectangle,ForeColor,TextFormatFlags.HorizontalCenter|TextFormatFlags.VerticalCenter|TextFormatFlags.WordBreak|TextFormatFlags.NoPrefix|(RightToLeft==RightToLeft.Yes?TextFormatFlags.RightToLeft:0));return;}
   if(!Design.Glass||IconGlyph==null){if(!AutoSize&&!Text.Contains("\n")){var area=new Rectangle(Padding.Left,Padding.Top,Math.Max(1,Width-Padding.Horizontal),Math.Max(1,Height-Padding.Vertical));using var fitted=Design.FitFont(Text,Font,area.Size);var align=TextAlign is ContentAlignment.MiddleCenter or ContentAlignment.TopCenter or ContentAlignment.BottomCenter?TextFormatFlags.HorizontalCenter:TextAlign is ContentAlignment.MiddleRight or ContentAlignment.TopRight or ContentAlignment.BottomRight?TextFormatFlags.Right:TextFormatFlags.Left;TextRenderer.DrawText(e.Graphics,Text,fitted,area,ForeColor,align|TextFormatFlags.VerticalCenter|TextFormatFlags.NoPrefix|(RightToLeft==RightToLeft.Yes?TextFormatFlags.RightToLeft:0));}else base.OnPaint(e);return;}
   int iconWidth=22;bool rtl=RightToLeft==RightToLeft.Yes;using var iconFont=new Font("Segoe MDL2 Assets",9);
   TextRenderer.DrawText(e.Graphics,IconGlyph,iconFont,new Rectangle(rtl?Width-iconWidth:0,0,iconWidth,Height),Design.Accent,TextFormatFlags.VerticalCenter|TextFormatFlags.HorizontalCenter);
