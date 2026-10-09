@@ -3,7 +3,7 @@ sealed partial class Client {
  readonly ConfigurationMenu configMenu=new();
  readonly System.Windows.Forms.Timer autoUpdateTimer=new(){Interval=60000};
  void InitializeAutoUpdate(){
-  autoUpdateTimer.Tick+=async(_,_)=>{if(preview||busy||updating||pingTesting||xray!=null)return;var targets=subscriptions.Where(g=>IsSubscription(g)&&g.AutoUpdate&&(!g.Updated.HasValue||DateTime.UtcNow-g.Updated.Value>=TimeSpan.FromHours(1))).ToArray();if(targets.Length>0)await UpdateGroups(targets);};
+  autoUpdateTimer.Tick+=async(_,_)=>{if(preview||busy||updating||pingTesting||xray!=null)return;var targets=subscriptions.Where(g=>IsSubscription(g)&&g.AutoUpdate&&(!g.Updated.HasValue||DateTime.UtcNow-g.Updated.Value>=TimeSpan.FromHours(Math.Clamp(g.AutoUpdateHours,1,168)))).ToArray();if(targets.Length>0)await UpdateGroups(targets);};
   if(!preview)autoUpdateTimer.Start();FormClosed+=(_,_)=>autoUpdateTimer.Dispose();
  }
  void InitializeConfigMenu(){

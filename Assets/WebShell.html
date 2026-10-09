@@ -1,0 +1,2247 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-theme="dark-blue">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Melavo VPN</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        :root {
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --custom-blur: 20px;
+            --custom-opacity: 0.8;
+            --custom-radius: 16px;
+            --custom-border: 1px;
+        }
+
+        /* Themes */
+        [data-theme="dark-blue"] {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --bg-card: rgba(17, 24, 39, var(--custom-opacity));
+            --bg-glass: rgba(255, 255, 255, 0.05);
+            --text-primary: #f0f4ff;
+            --text-secondary: #94a3b8;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.3);
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --border: rgba(255, 255, 255, 0.1);
+            --sidebar-bg: rgba(15, 23, 42, var(--custom-opacity));
+        }
+
+        [data-theme="dark-purple"] {
+            --bg-primary: #0f0517;
+            --bg-secondary: #1a0a2e;
+            --bg-card: rgba(26, 10, 46, var(--custom-opacity));
+            --bg-glass: rgba(255, 255, 255, 0.05);
+            --text-primary: #f0e6ff;
+            --text-secondary: #a78bfa;
+            --accent: #8b5cf6;
+            --accent-glow: rgba(139, 92, 246, 0.3);
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --border: rgba(139, 92, 246, 0.2);
+            --sidebar-bg: rgba(15, 5, 23, var(--custom-opacity));
+        }
+
+        [data-theme="dark-emerald"] {
+            --bg-primary: #021a0a;
+            --bg-secondary: #042f14;
+            --bg-card: rgba(4, 47, 20, var(--custom-opacity));
+            --bg-glass: rgba(255, 255, 255, 0.05);
+            --text-primary: #e6fff0;
+            --text-secondary: #6ee7b7;
+            --accent: #10b981;
+            --accent-glow: rgba(16, 185, 129, 0.3);
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --border: rgba(16, 185, 129, 0.2);
+            --sidebar-bg: rgba(2, 26, 10, var(--custom-opacity));
+        }
+
+        [data-theme="dark-rose"] {
+            --bg-primary: #1a0510;
+            --bg-secondary: #2e0a1a;
+            --bg-card: rgba(46, 10, 26, var(--custom-opacity));
+            --bg-glass: rgba(255, 255, 255, 0.05);
+            --text-primary: #ffe6f0;
+            --text-secondary: #f472b6;
+            --accent: #ec4899;
+            --accent-glow: rgba(236, 72, 153, 0.3);
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --border: rgba(236, 72, 153, 0.2);
+            --sidebar-bg: rgba(26, 5, 16, var(--custom-opacity));
+        }
+
+        [data-theme="dark-carbon"] {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #141414;
+            --bg-card: rgba(20, 20, 20, var(--custom-opacity));
+            --bg-glass: rgba(255, 255, 255, 0.03);
+            --text-primary: #e5e5e5;
+            --text-secondary: #737373;
+            --accent: #f97316;
+            --accent-glow: rgba(249, 115, 22, 0.3);
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --border: rgba(255, 255, 255, 0.08);
+            --sidebar-bg: rgba(10, 10, 10, var(--custom-opacity));
+        }
+
+        [data-theme="dark-neon"] {
+            --bg-primary: #000014;
+            --bg-secondary: #0a0a2a;
+            --bg-card: rgba(10, 10, 42, var(--custom-opacity));
+            --bg-glass: rgba(0, 255, 255, 0.05);
+            --text-primary: #e0ffff;
+            --text-secondary: #00ffff;
+            --accent: #00ffff;
+            --accent-glow: rgba(0, 255, 255, 0.4);
+            --success: #00ff88;
+            --danger: #ff0066;
+            --warning: #ffff00;
+            --border: rgba(0, 255, 255, 0.2);
+            --sidebar-bg: rgba(0, 0, 20, var(--custom-opacity));
+        }
+
+        [data-theme="dark-matrix"] {
+            --bg-primary: #000000;
+            --bg-secondary: #001a00;
+            --bg-card: rgba(0, 26, 0, var(--custom-opacity));
+            --bg-glass: rgba(0, 255, 0, 0.05);
+            --text-primary: #00ff00;
+            --text-secondary: #008800;
+            --accent: #00ff00;
+            --accent-glow: rgba(0, 255, 0, 0.4);
+            --success: #00ff00;
+            --danger: #ff0000;
+            --warning: #ffff00;
+            --border: rgba(0, 255, 0, 0.2);
+            --sidebar-bg: rgba(0, 10, 0, var(--custom-opacity));
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-card: rgba(255, 255, 255, var(--custom-opacity));
+            --bg-glass: rgba(0, 0, 0, 0.03);
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.15);
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --border: rgba(0, 0, 0, 0.1);
+            --sidebar-bg: rgba(255, 255, 255, var(--custom-opacity));
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: var(--transition);
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bg-animation .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .orb:nth-child(1) {
+            width: 400px;
+            height: 400px;
+            background: var(--accent);
+            top: -100px;
+            right: -100px;
+        }
+
+        .orb:nth-child(2) {
+            width: 300px;
+            height: 300px;
+            background: var(--success);
+            bottom: -50px;
+            left: -50px;
+            animation-delay: -5s;
+        }
+
+        .orb:nth-child(3) {
+            width: 200px;
+            height: 200px;
+            background: var(--warning);
+            top: 50%;
+            left: 50%;
+            animation-delay: -10s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(50px, -50px) scale(1.1); }
+            50% { transform: translate(-30px, 30px) scale(0.9); }
+            75% { transform: translate(20px, 50px) scale(1.05); }
+        }
+
+        /* Layout */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(var(--custom-blur));
+            border-left: var(--custom-border) solid var(--border);
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            position: fixed;
+            right: 0;
+            top: 0;
+            height: 100vh;
+            z-index: 100;
+        }
+
+        [dir="ltr"] .sidebar {
+            right: auto;
+            left: 0;
+            border-left: none;
+            border-right: var(--custom-border) solid var(--border);
+        }
+
+        .sidebar-header {
+            padding: 20px 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, var(--accent), var(--success));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            animation: pulse-glow 3s infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px var(--accent-glow); }
+            50% { box-shadow: 0 0 40px var(--accent-glow); }
+        }
+
+        .logo-text h2 {
+            font-size: 16px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-text span {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .nav-menu {
+            flex: 1;
+            padding: 0 15px;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, var(--accent-glow));
+            transition: var(--transition);
+            border-radius: 12px;
+        }
+
+        [dir="ltr"] .nav-item::before {
+            right: auto;
+            left: 0;
+            background: linear-gradient(270deg, transparent, var(--accent-glow));
+        }
+
+        .nav-item:hover::before {
+            width: 100%;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-glass);
+        }
+
+        .nav-item.active {
+            background: var(--accent-glow);
+            border: 1px solid var(--accent);
+        }
+
+        .nav-icon {
+            font-size: 20px;
+            width: 24px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .nav-text {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav-badge {
+            margin-right: auto;
+            background: var(--accent);
+            color: white;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        [dir="ltr"] .nav-badge {
+            margin-right: 0;
+            margin-left: auto;
+        }
+
+        .sidebar-footer {
+            padding: 15px 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .connection-mini {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: var(--bg-glass);
+            border-radius: 10px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--danger);
+            animation: blink 2s infinite;
+        }
+
+        .status-dot.connected {
+            background: var(--success);
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-right: 280px;
+            padding: 30px;
+            transition: var(--transition);
+        }
+
+        [dir="ltr"] .main-content {
+            margin-right: 0;
+            margin-left: 280px;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 15px 25px;
+            background: var(--bg-card);
+            backdrop-filter: blur(var(--custom-blur));
+            border-radius: var(--custom-radius);
+            border: var(--custom-border) solid var(--border);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .top-bar-title h1 {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .top-bar-title p {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .top-bar-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            transition: width 0.6s, height 0.6s;
+            transform: translate(-50%, -50%);
+        }
+
+        .btn:active::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #2563eb);
+            color: white;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--accent-glow);
+        }
+
+        .btn-secondary {
+            background: var(--bg-glass);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent-glow);
+            border-color: var(--accent);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger), #dc2626);
+            color: white;
+        }
+
+        /* Page Sections */
+        .page-section {
+            display: none;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .page-section.active {
+            display: block;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(var(--custom-blur));
+            border: var(--custom-border) solid var(--border);
+            border-radius: var(--custom-radius);
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            border-color: var(--accent-glow);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Connection Panel - Professional */
+        .connection-panel {
+            background: var(--bg-card);
+            backdrop-filter: blur(var(--custom-blur));
+            border: var(--custom-border) solid var(--border);
+            border-radius: var(--custom-radius);
+            padding: 30px;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .connection-panel::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .connection-panel.connected::before {
+            opacity: 0.3;
+            animation: pulse-bg 3s infinite;
+        }
+
+        @keyframes pulse-bg {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.05); }
+        }
+
+        .connection-content {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            position: relative;
+            z-index: 1;
+            flex-wrap: wrap;
+        }
+
+        .power-button-container {
+            position: relative;
+        }
+
+        .power-button {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid var(--border);
+            background: var(--bg-glass);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .power-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: var(--accent-glow);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+
+        .power-button:hover::before {
+            width: 120%;
+            height: 120%;
+        }
+
+        .power-button:hover {
+            border-color: var(--accent);
+            transform: scale(1.05);
+        }
+
+        .power-button.active {
+            border-color: var(--success);
+            box-shadow: 0 0 40px rgba(16, 185, 129, 0.5);
+            animation: pulse-power 2s infinite;
+        }
+
+        .power-button.active::before {
+            background: rgba(16, 185, 129, 0.2);
+            width: 120%;
+            height: 120%;
+        }
+
+        @keyframes pulse-power {
+            0%, 100% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.4); }
+            50% { box-shadow: 0 0 60px rgba(16, 185, 129, 0.6); }
+        }
+
+        .power-icon {
+            font-size: 36px;
+            color: var(--text-secondary);
+            transition: var(--transition);
+            position: relative;
+            z-index: 1;
+        }
+
+        .power-button.active .power-icon {
+            color: var(--success);
+            animation: icon-pulse 2s infinite;
+        }
+
+        @keyframes icon-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .connection-info-panel {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .connection-status-main {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .connection-status-main .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--danger);
+            animation: blink 2s infinite;
+        }
+
+        .connection-status-main .status-indicator.connected {
+            background: var(--success);
+        }
+
+        .connection-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+        }
+
+        .connection-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-item {
+            background: var(--bg-glass);
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .stat-item .stat-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--accent);
+            font-family: monospace;
+            direction: ltr;
+        }
+
+        .stat-item .stat-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .connection-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        /* IP Info Panel */
+        .ip-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: var(--custom-radius);
+        }
+
+        .ip-item {
+            text-align: center;
+            padding: 10px;
+        }
+
+        .ip-item .flag {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .ip-item .label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .ip-item .value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent);
+            font-family: monospace;
+            direction: ltr;
+        }
+
+        /* Tabs - Direction Aware */
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            background: var(--bg-glass);
+            padding: 5px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            flex-wrap: wrap;
+            direction: ltr;
+        }
+
+        [dir="rtl"] .tabs {
+            direction: rtl;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: var(--transition);
+            flex: 1;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .tab:hover {
+            background: var(--bg-glass);
+        }
+
+        .tab.active {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        /* Subscription Group */
+        .sub-group {
+            margin-bottom: 15px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .sub-group:hover {
+            border-color: var(--accent);
+        }
+
+        .sub-group-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px 20px;
+            background: var(--bg-glass);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .sub-group-header:hover {
+            background: var(--accent-glow);
+        }
+
+        .sub-group-header.active {
+            background: var(--accent-glow);
+        }
+
+        [dir="rtl"] .sub-group-header.active {
+            border-right: 3px solid var(--accent);
+        }
+
+        [dir="ltr"] .sub-group-header.active {
+            border-left: 3px solid var(--accent);
+        }
+
+        .sub-group-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--accent-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .sub-group-info {
+            flex: 1;
+        }
+
+        .sub-group-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .sub-group-meta {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .sub-group-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .sub-group-nodes {
+            font-size: 12px;
+            color: var(--accent);
+            background: var(--accent-glow);
+            padding: 4px 10px;
+            border-radius: 8px;
+            margin-left: 10px;
+        }
+
+        [dir="rtl"] .sub-group-nodes {
+            margin-left: 0;
+            margin-right: 10px;
+        }
+
+        .sub-group-toggle {
+            font-size: 16px;
+            transition: var(--transition);
+            color: var(--text-secondary);
+        }
+
+        .sub-group.open .sub-group-toggle {
+            transform: rotate(90deg);
+        }
+
+        [dir="ltr"] .sub-group.open .sub-group-toggle {
+            transform: rotate(90deg);
+        }
+
+        .sub-group-nodes-list {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+            background: var(--bg-primary);
+        }
+
+        .sub-group.open .sub-group-nodes-list {
+            max-height: 2000px;
+        }
+
+        /* Node Item - Enhanced Marker */
+        .node-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            transition: var(--transition);
+            cursor: pointer;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+        }
+
+        .node-item:last-child {
+            border-bottom: none;
+        }
+
+        .node-item:hover {
+            background: var(--bg-glass);
+        }
+
+        .node-item.selected {
+            background: linear-gradient(90deg, var(--accent-glow), transparent);
+            position: relative;
+        }
+
+        [dir="ltr"] .node-item.selected {
+            background: linear-gradient(270deg, var(--accent-glow), transparent);
+        }
+
+        .node-item.selected::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--accent), var(--success));
+            border-radius: 0 4px 4px 0;
+            animation: marker-glow 2s infinite;
+        }
+
+        [dir="ltr"] .node-item.selected::before {
+            right: auto;
+            left: 0;
+            border-radius: 4px 0 0 4px;
+        }
+
+        @keyframes marker-glow {
+            0%, 100% { box-shadow: 0 0 10px var(--accent-glow); }
+            50% { box-shadow: 0 0 20px var(--accent-glow); }
+        }
+
+        .node-item.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            background: var(--success);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: white;
+            font-weight: bold;
+            animation: check-pop 0.3s ease;
+        }
+
+        [dir="ltr"] .node-item.selected::after {
+            right: auto;
+            left: 10px;
+        }
+
+        @keyframes check-pop {
+            0% { transform: translateY(-50%) scale(0); }
+            50% { transform: translateY(-50%) scale(1.2); }
+            100% { transform: translateY(-50%) scale(1); }
+        }
+
+        .node-flag {
+            font-size: 24px;
+        }
+
+        .node-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .node-name {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .node-detail {
+            font-size: 11px;
+            color: var(--text-secondary);
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .node-detail span {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .node-ping {
+            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .ping-good { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .ping-medium { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .ping-bad { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+        .ping-none { background: var(--bg-glass); color: var(--text-secondary); }
+
+        .icon-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-glass);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            font-size: 14px;
+        }
+
+        .icon-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        /* Context Menu */
+        .context-menu {
+            position: fixed;
+            background: var(--bg-secondary);
+            backdrop-filter: blur(var(--custom-blur));
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 8px;
+            min-width: 200px;
+            z-index: 2000;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            display: none;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .context-menu.show {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .context-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: var(--transition);
+        }
+
+        .context-item:hover {
+            background: var(--accent-glow);
+            color: var(--accent);
+        }
+
+        .context-item.danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .context-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 5px 0;
+        }
+
+        .context-icon {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Theme Grid */
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .theme-card {
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .theme-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .theme-card.active {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .theme-preview {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-name {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* Custom Theme Settings */
+        .custom-theme-panel {
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+
+        .custom-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .custom-control {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .custom-control label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .custom-control input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .custom-control input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .custom-control input[type="color"] {
+            width: 100%;
+            height: 40px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            cursor: pointer;
+        }
+
+        .custom-control .value-display {
+            font-size: 11px;
+            color: var(--accent);
+            font-family: monospace;
+        }
+
+        .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .preset-btn {
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg-glass);
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .preset-btn:hover {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        /* Toggle Switch */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .toggle-container:last-child {
+            border-bottom: none;
+        }
+
+        .toggle-label {
+            font-size: 14px;
+        }
+
+        .toggle-desc {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 3px;
+        }
+
+        .toggle {
+            width: 48px;
+            height: 26px;
+            background: var(--border);
+            border-radius: 13px;
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+
+        .toggle.active {
+            background: var(--accent);
+        }
+
+        .toggle::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            transition: var(--transition);
+        }
+
+        .toggle.active::after {
+            right: 25px;
+        }
+
+        [dir="ltr"] .toggle::after {
+            right: auto;
+            left: 3px;
+        }
+
+        [dir="ltr"] .toggle.active::after {
+            left: 25px;
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 13px;
+            transition: var(--transition);
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-glass);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        [dir="ltr"] .toast-container {
+            left: auto;
+            right: 20px;
+        }
+
+        .toast {
+            padding: 15px 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+            backdrop-filter: blur(20px);
+            min-width: 300px;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        [dir="ltr"] .toast {
+            animation: slideInLTR 0.3s ease, fadeOutLTR 0.3s ease 2.7s forwards;
+        }
+
+        @keyframes slideInLTR {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; transform: translateX(-50px); }
+        }
+
+        @keyframes fadeOutLTR {
+            to { opacity: 0; transform: translateX(50px); }
+        }
+
+        .toast-icon { font-size: 20px; }
+        .toast-message { font-size: 13px; font-weight: 500; }
+
+        /* Log */
+        .log-container {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            direction: ltr;
+            text-align: left;
+        }
+
+        .log-entry {
+            padding: 3px 0;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .log-entry .time { color: var(--accent); }
+        .log-entry .success { color: var(--success); }
+        .log-entry .error { color: var(--danger); }
+
+        /* Progress */
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--success));
+            border-radius: 3px;
+            transition: width 1s ease;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+        /* Language Toggle */
+        .lang-toggle {
+            display: flex;
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 3px;
+        }
+
+        .lang-btn {
+            padding: 6px 12px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: var(--transition);
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+        }
+
+        .lang-btn.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar { width: 70px; padding: 15px 0; }
+            .nav-text, .nav-badge, .logo-text, .sidebar-footer .connection-mini span { display: none; }
+            .main-content { margin-right: 70px; padding: 15px; }
+            [dir="ltr"] .main-content { margin-left: 70px; }
+            .custom-row { grid-template-columns: 1fr; }
+            .ip-panel { grid-template-columns: 1fr 1fr; }
+            .connection-content { flex-direction: column; text-align: center; }
+        }
+
+/* Desktop host: the supplied reference CSS remains intact above. */
+.desktop-caption{height:38px;position:fixed;inset:0 0 auto;z-index:200;background:var(--sidebar-bg);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding-inline-start:18px;direction:ltr;font-size:12px;user-select:none}
+.desktop-caption small{color:var(--text-secondary);margin-inline-start:8px}.caption-actions{display:flex;height:100%}.caption-actions button{width:44px;border:0;background:none;color:var(--text-secondary);transition:var(--transition);cursor:pointer}.caption-actions button:hover{background:var(--bg-glass);color:var(--text-primary)}.caption-actions .caption-close:hover{background:rgba(239,68,68,.2);color:var(--danger)}
+.sidebar{top:38px;height:calc(100vh - 38px)}.main-content{padding-top:68px}.creator{font-size:11px;text-align:center;margin-top:16px;color:var(--text-secondary)}.creator-link{display:block;margin:8px auto 0;background:none;border:0;color:var(--text-secondary);cursor:pointer}.creator-link:hover{color:var(--accent)}
+.host-note{font-size:13px;color:var(--text-secondary);white-space:pre-line;line-height:1.8;margin:12px 0}.toggle{border:0;flex:none;cursor:pointer}.toggle:disabled{opacity:.5;cursor:default}.btn:disabled{opacity:.45;cursor:default;transform:none}.form-input,.form-select{color-scheme:dark}.form-input:focus-visible,.form-select:focus-visible,button:focus-visible,[role=button]:focus-visible{outline:2px solid var(--accent);outline-offset:3px}[data-theme=light] .form-input,[data-theme=light] .form-select{color-scheme:light}
+.sub-group-info,.node-info{min-width:0}.sub-group-meta{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;direction:ltr;text-align:start}.sub-group-name,.node-name{overflow-wrap:anywhere}.sub-group-nodes-list{max-height:none;display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .3s cubic-bezier(.4,0,.2,1),opacity .3s ease}.sub-group.open .sub-group-nodes-list{grid-template-rows:1fr;opacity:1}.node-list-inner{min-height:0;overflow:hidden}.sub-group-toggle{flex:none}.sub-group-header{gap:12px}.sub-group-nodes{white-space:nowrap}.node-item{padding-inline-end:40px}.node-flag{flex:none}.node-ping{flex:none;white-space:nowrap}.group-account{font-size:11px;color:var(--text-secondary);margin-top:5px}.share-qr{display:block;width:min(100%,280px);height:auto;background:white;padding:12px;border-radius:12px;margin:0 auto 20px;image-rendering:pixelated}.modal-overlay{z-index:300}.modal{max-height:calc(100vh - 90px);overflow-y:auto}.auto-update-label{display:flex;gap:10px;align-items:center;margin-top:18px;font-size:13px}.context-menu{z-index:400;max-width:calc(100vw - 20px)}.theme-card{min-width:0}.connection-actions{flex-wrap:wrap}.ip-panel{grid-template-columns:repeat(5,minmax(0,1fr))}.ip-item{min-width:0}.ip-item .value{overflow-wrap:anywhere}.status-bar{font-size:12px;color:var(--text-secondary);margin-bottom:12px;min-height:18px}
+@media(max-width:1050px) and (min-width:769px){.sidebar{width:220px}.main-content{margin-right:220px;padding:58px 20px 20px}[dir=ltr] .main-content{margin-right:0;margin-left:220px}.sidebar-header{padding:20px 16px}.nav-menu{padding:0 10px}.ip-panel{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:768px){.main-content{padding-top:53px}[dir=ltr] .main-content{margin-right:0}.sidebar-header{padding:12px;justify-content:center}.logo{flex:none}.sidebar-footer{padding:10px}.creator{display:none}.nav-item{justify-content:center;padding:12px 6px}.ip-panel{grid-template-columns:repeat(2,minmax(0,1fr))}.sub-group-header{padding:12px;flex-wrap:wrap}.sub-group-info{flex:1;min-width:110px}.sub-group-actions{margin-inline-start:auto}.top-bar{padding:15px}.connection-panel{padding:20px}.bg-animation .orb{filter:blur(60px)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+    </style>
+</head>
+<body>
+<div class="desktop-caption" onpointerdown="captionDrag(event)" ondblclick="rpc('maximize')"><span>Melavo VPN <small id="captionVersion"></small></span><div class="caption-actions"><button onclick="rpc('minimize')" aria-label="Minimize">—</button><button onclick="rpc('maximize')" aria-label="Maximize">□</button><button class="caption-close" onclick="rpc('close')" aria-label="Close">✕</button></div></div>
+    <div class="bg-animation">
+        <div class="orb"></div>
+        <div class="orb"></div>
+        <div class="orb"></div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="contextMenu">
+        <div class="context-item" onclick="contextAction('connect')">
+            <span class="context-icon">⚡</span>
+            <span data-i18n="ctx_connect">اتصال</span>
+        </div>
+        <div class="context-item" onclick="contextAction('share')"><span class="context-icon">🔗</span><span data-i18n="ctx_share"></span></div>
+        <div class="context-item" onclick="contextAction('copy')">
+            <span class="context-icon">📋</span>
+            <span data-i18n="ctx_copy">کپی لینک</span>
+        </div>
+        <div class="context-item" onclick="contextAction('edit')">
+            <span class="context-icon">✏️</span>
+            <span data-i18n="ctx_edit">ویرایش</span>
+        </div>
+        <div class="context-item" onclick="contextAction('ping')">
+            <span class="context-icon">📡</span>
+            <span data-i18n="ctx_ping">تست پینگ</span>
+        </div>
+        <div class="context-item" onclick="contextAction('ip')">
+            <span class="context-icon">🌐</span>
+            <span data-i18n="ctx_ip">مشاهده IP</span>
+        </div>
+        <div class="context-divider"></div>
+        <div class="context-item danger" onclick="contextAction('delete')">
+            <span class="context-icon">🗑️</span>
+            <span data-i18n="ctx_delete">حذف</span>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo"><svg width="28" height="28" viewBox="0 0 32 32" fill="none"><path d="M5 25V8l11 12L27 8v17" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div class="logo-text">
+                    <h2>Melavo VPN</h2>
+                    <span id="brandVersion">Melavo</span>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <div class="nav-item active" onclick="showPage('servers')">
+                    <span class="nav-icon">🌐</span>
+                    <span class="nav-text" data-i18n="nav_servers">لیست سرورها</span>
+                    <span class="nav-badge" id="totalNodesBadge">0</span>
+                </div>
+                <div class="nav-item" onclick="showPage('singbox')">
+                    <span class="nav-icon">📦</span>
+                    <span class="nav-text" data-i18n="nav_singbox">Sing-Box</span>
+                </div>
+                <div class="nav-item" onclick="showPage('update')">
+                    <span class="nav-icon">🔄</span>
+                    <span class="nav-text" data-i18n="nav_update">بروزرسانی</span>
+                </div>
+                <div class="nav-item" onclick="showPage('logs')">
+                    <span class="nav-icon">📝</span>
+                    <span class="nav-text" data-i18n="nav_logs">لاگ‌ها</span>
+                </div>
+                <div class="nav-item" onclick="showPage('settings')">
+                    <span class="nav-icon">🎨</span>
+                    <span class="nav-text" data-i18n="nav_settings">تنظیمات و تم</span>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="connection-mini">
+                    <div class="status-dot" id="statusDot"></div>
+                    <span data-i18n="status_disconnected">قطع</span>
+                </div>
+            <div class="creator"><span id="madeWithLove"></span><button class="creator-link" onclick="rpc('github')">github.com/sirvan1133</button></div></div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="top-bar-title">
+                    <h1 id="pageTitle" data-i18n="page_servers_title">لیست سرورها</h1>
+                    <p id="pageDesc" data-i18n="page_servers_desc">مدیریت سابسکریپشن‌ها، کانفیگ‌ها و اتصال</p>
+                </div>
+                <div class="top-bar-actions">
+                    <div class="lang-toggle">
+                        <button class="lang-btn active" onclick="setLang('fa', this)"><span id="faLanguageLabel">فا</span></button>
+                        <button class="lang-btn" onclick="setLang('en', this)">EN</button>
+                    </div>
+                    <button class="btn btn-secondary" onclick="refreshAll()">🔄 <span data-i18n="btn_refresh">بروزرسانی</span></button>
+                </div>
+            </div>
+
+            <!-- Servers Page -->
+            <div class="page-section active" id="page-servers">
+                <!-- Connection Panel - Professional -->
+                <div class="connection-panel" id="connectionPanel">
+                    <div class="connection-content">
+                        <div class="power-button-container">
+                            <div class="power-button" id="powerButton" onclick="toggleConnection()">
+                                <span class="power-icon">⏻</span>
+                            </div>
+                        </div>
+                        <div class="connection-info-panel">
+                            <div class="connection-status-main">
+                                <div class="status-indicator" id="statusIndicator"></div>
+                                <span id="connectionStatusText" data-i18n="status_disconnected">قطع</span>
+                            </div>
+                            <div class="connection-subtitle" id="connectionSubtitle" data-i18n="connection_subtitle">برای اتصال دکمه را فشار دهید</div>
+                            <div class="connection-stats">
+                                <div class="stat-item">
+                                    <div class="stat-value" id="statSpeed">0 MB/s</div>
+                                    <div class="stat-label" data-i18n="stat_speed">سرعت</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="statPing">-- ms</div>
+                                    <div class="stat-label" data-i18n="stat_ping">پینگ</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="statUptime">00:00:00</div>
+                                    <div class="stat-label" data-i18n="stat_uptime">زمان اتصال</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="statData">0 GB</div>
+                                    <div class="stat-label" data-i18n="stat_data">مصرف</div>
+                                </div>
+                            </div>
+                            <div class="connection-actions">
+                                <button class="btn btn-primary" onclick="quickConnect()">⚡ <span data-i18n="btn_quick_connect">اتصال سریع</span></button>
+                                <button class="btn btn-secondary" onclick="showServerList()">📋 <span data-i18n="btn_show_servers">انتخاب سرور</span></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- IP Info Panel -->
+                <div class="ip-panel" id="ipPanel">
+                    <div class="ip-item">
+                        <div class="flag" id="ipFlag">🌍</div>
+                        <div class="label" data-i18n="ip_direct">IP مستقیم</div>
+                        <div class="value" id="directIP">—</div>
+                    </div>
+                    <div class="ip-item">
+                        <div class="flag" id="proxyFlag">🌍</div>
+                        <div class="label" data-i18n="ip_proxy">IP پروکسی</div>
+                        <div class="value" id="proxyIP">—</div>
+                    </div>
+                    <div class="ip-item">
+                        <div class="label" data-i18n="ip_country">کشور</div>
+                        <div class="value" id="ipCountry">—</div>
+                    </div>
+                    <div class="ip-item">
+                        <div class="label" data-i18n="ip_isp">ISP</div>
+                        <div class="value" id="ipISP">—</div>
+                    </div>
+                    <div class="ip-item">
+                        <div class="label" data-i18n="ip_ping">پینگ</div>
+                        <div class="value" id="ipPing">-- ms</div>
+                    </div>
+                </div>
+
+                <!-- Action Bar -->
+                <div class="card" style="padding: 15px 20px;">
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                        <button class="btn btn-primary" onclick="openModal('addSubModal')">➕ <span data-i18n="btn_add_sub">سابسکریپشن</span></button>
+                        <button class="btn btn-secondary" onclick="openModal('addConfigModal')">🔗 <span data-i18n="btn_add_config">کانفیگ تکی</span></button>
+                        <button class="btn btn-secondary" onclick="testAllPings()">📡 <span data-i18n="btn_test_all">تست همه</span></button>
+                        <button class="btn btn-secondary" onclick="sortNodes('ping')">📊 <span data-i18n="btn_sort_ping">مرتب‌سازی پینگ</span></button>
+                        <button class="btn btn-secondary" onclick="sortNodes('name')">🔤 <span data-i18n="btn_sort_name">مرتب‌سازی نام</span></button>
+                        <div style="margin-right: auto; display: flex; gap: 8px; align-items: center;">
+                            <input type="text" class="form-input" style="width: 200px; padding: 8px 12px;" placeholder="🔍 Search..." id="searchInput" oninput="filterNodes()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="tabs">
+                    <div class="tab active" onclick="filterView('all')" data-i18n="tab_all">همه</div>
+                    <div class="tab" onclick="filterView('subs')" data-i18n="tab_subs">سابسکریپشن‌ها</div>
+                    <div class="tab" onclick="filterView('single')" data-i18n="tab_single">تکی</div>
+                </div>
+
+                <div class="status-bar" id="hostStatus" role="status"></div>
+                <!-- Server List Container -->
+                <div id="serverListContainer"></div>
+            </div>
+
+<div class="page-section" id="page-singbox"><div class="card"><div class="card-header"><div class="card-title">📦 <span data-i18n="singbox_title"></span></div></div>
+<div class="toggle-container"><div><div class="toggle-label">TUN Mode</div><div class="toggle-desc" data-i18n="singbox_tun_desc"></div></div><button class="toggle" id="tunToggle" onclick="setToggle('tun',this)" role="switch"></button></div>
+<div class="toggle-container"><div><div class="toggle-label" data-i18n="core_engine"></div><div class="toggle-desc" data-i18n="core_engine_desc"></div></div><span class="node-ping">Xray + sing-box</span></div>
+<div class="card-title" style="margin-top:20px" data-i18n="core_info"></div><p id="coreInfo" class="host-note"></p>
+<div class="form-group"><label class="form-label" data-i18n="socks_endpoint"></label><input class="form-input" id="socksEndpoint" readonly dir="ltr" value="—"></div>
+</div></div>
+<div class="page-section" id="page-update"><div class="card"><div class="card-header"><div class="card-title">🔄 <span data-i18n="update_title"></span></div></div><div style="text-align:center;padding:30px"><div style="font-size:50px;margin-bottom:15px;animation:spin 3s linear infinite;display:inline-block">🔄</div><h3 id="currentVersion"></h3><p id="updateStatus" class="host-note"></p><div class="progress-bar" style="height:8px"><div class="progress-fill" id="updateProgress" style="width:0%"></div></div><div class="connection-actions" style="justify-content:center;margin-top:20px"><button class="btn btn-primary" data-mutation onclick="runAction('app-update')">📥 <span data-i18n="update_download"></span></button><button class="btn btn-secondary" data-mutation onclick="runAction('local-update')">📦 <span data-i18n="local_update"></span></button></div></div></div>
+<div class="card"><div class="card-header"><div class="card-title">🔧 <span data-i18n="update_cores"></span></div></div><p class="host-note" id="updateCoreInfo"></p><button class="btn btn-secondary" data-mutation onclick="confirmAction('core-update')">📥 <span data-i18n="update_xray"></span></button></div></div>
+            <!-- Logs Page -->
+            <div class="page-section" id="page-logs">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">📝 <span data-i18n="logs_title">لاگ‌های سیستم</span></div>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn btn-secondary" onclick="clearLogs()">🗑️ <span data-i18n="logs_clear">پاک کردن</span></button>
+                            <button class="btn btn-secondary" onclick="exportLogs()">📤 <span data-i18n="logs_export">خروجی</span></button>
+                        </div>
+                    </div>
+                    <div class="log-container" id="logContainer">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Page -->
+            <div class="page-section" id="page-settings">
+                <!-- Theme Selection -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">🎨 <span data-i18n="theme_title">انتخاب تم</span></div>
+                    </div>
+                    <div class="theme-grid">
+                        <div class="theme-card active" onclick="setTheme('dark-blue', this)">
+                            <div class="theme-preview" style="background: linear-gradient(135deg, #0a0e1a, #3b82f6);"></div>
+                            <div class="theme-name" data-i18n="theme_blue">آبی تیره</div>
+                        </div>
+                        <div class="theme-card" onclick="setTheme('dark-purple', this)">
+                            <div class="theme-preview" style="background: linear-gradient(135deg, #0f0517, #8b5cf6);"></div>
+                            <div class="theme-name" data-i18n="theme_purple">بنفش تیره</div>
+                        </div>
+                        <div class="theme-card" onclick="setTheme('dark-emerald', this)">
+                            <div class="theme-preview" style="background: linear-gradient(135deg, #021a0a, #10b981);"></div>
+                            <div class="theme-name" data-i18n="theme_emerald">زمردی</div>
+                        </div>
+                        <div class="theme-card" onclick="setTheme('dark-rose', this)">
+                            <div class="theme-preview" style="background: linear-gradient(135deg, #1a0510, #ec4899);"></div>
+                            <div class="theme-name" data-i18n="theme_rose">رز</div>
+                        </div>
+                        <div class="theme-card" onclick="setTheme('dark-carbon', this)">
+                            <div class="theme-preview" style="background: linear-gradient(135deg, #0a0a0a, #f97316);"></div>
+                            <div class="theme-name" data-i18n="theme_carbon">کربنی</div>
+                        </div>
+                        <div class="theme-card" onclick="setTheme('dark-neon', this)">
+                            <div class="theme-preview" style="background: linear-gradient(135deg, #000014, #00ffff);"></div>
+                            <div class="theme-name" data-i18n="theme_neon">نئون</div>
+                        </div>
+                        <div class="theme-card" onclick="setTheme('dark-matrix', this)">
+                            <div class="theme-preview" style="background: linear-gradient(135deg, #000, #00ff00);"></div>
+                            <div class="theme-name" data-i18n="theme_matrix">ماتریکس</div>
+                        </div>
+                        <div class="theme-card" onclick="setTheme('light', this)">
+                            <div class="theme-preview" style="background: linear-gradient(135deg, #f8fafc, #3b82f6);"></div>
+                            <div class="theme-name" data-i18n="theme_light">روشن</div>
+                        </div>
+                    </div>
+
+                    <!-- Custom Theme Settings -->
+                    <div class="custom-theme-panel">
+                        <div class="card-title" style="margin-bottom: 15px;">⚙️ <span data-i18n="custom_title">تنظیمات دلخواه</span></div>
+
+                        <div class="custom-row">
+                            <div class="custom-control">
+                                <label data-i18n="custom_blur">میزان بلور (Blur)</label>
+                                <input type="range" min="0" max="40" value="20" id="blurRange" oninput="updateCustomTheme()">
+                                <span class="value-display" id="blurValue">20px</span>
+                            </div>
+                            <div class="custom-control">
+                                <label data-i18n="custom_opacity">شفافیت (Opacity)</label>
+                                <input type="range" min="30" max="100" value="80" id="opacityRange" oninput="updateCustomTheme()">
+                                <span class="value-display" id="opacityValue">80%</span>
+                            </div>
+                        </div>
+
+                        <div class="custom-row">
+                            <div class="custom-control">
+                                <label data-i18n="custom_radius">گردی گوشه‌ها (Radius)</label>
+                                <input type="range" min="0" max="30" value="16" id="radiusRange" oninput="updateCustomTheme()">
+                                <span class="value-display" id="radiusValue">16px</span>
+                            </div>
+                            <div class="custom-control">
+                                <label data-i18n="custom_border">ضخامت حاشیه</label>
+                                <input type="range" min="0" max="3" value="1" id="borderRange" oninput="updateCustomTheme()">
+                                <span class="value-display" id="borderValue">1px</span>
+                            </div>
+                        </div>
+
+                        <div class="custom-row">
+                            <div class="custom-control">
+                                <label data-i18n="custom_accent">رنگ اصلی (Accent)</label>
+                                <input type="color" id="accentColor" value="#3b82f6" oninput="updateCustomTheme()">
+                            </div>
+                            <div class="custom-control">
+                                <label data-i18n="custom_bg">رنگ پس‌زمینه</label>
+                                <input type="color" id="bgColor" value="#0a0e1a" oninput="updateCustomTheme()">
+                            </div>
+                        </div>
+
+                        <div class="preset-grid">
+                            <button class="preset-btn" onclick="applyPreset('glass')" data-i18n="preset_glass">🔮 شیشه‌ای</button>
+                            <button class="preset-btn" onclick="applyPreset('carbon')" data-i18n="preset_carbon">⚫ کربنی</button>
+                            <button class="preset-btn" onclick="applyPreset('neon')" data-i18n="preset_neon">💡 نئون</button>
+                            <button class="preset-btn" onclick="applyPreset('matte')" data-i18n="preset_matte">🎨 مات</button>
+                            <button class="preset-btn" onclick="applyPreset('sharp')" data-i18n="preset_sharp">📐 تیز</button>
+                            <button class="preset-btn" onclick="applyPreset('reset')" data-i18n="preset_reset">🔄 پیش‌فرض</button>
+                        </div>
+                    </div>
+                </div>
+
+<div class="card"><div class="card-header"><div class="card-title">⚙️ <span data-i18n="settings_general"></span></div></div>
+<div class="toggle-container"><div><div class="toggle-label" data-i18n="setting_tray"></div><div class="toggle-desc" data-i18n="setting_tray_desc"></div></div><button class="toggle" id="trayToggle" onclick="setToggle('tray',this)" role="switch"></button></div>
+<div class="toggle-container"><div><div class="toggle-label" data-i18n="setting_autoupdate"></div><div class="toggle-desc" data-i18n="setting_autoupdate_desc"></div></div><button class="toggle" id="autoUpdateToggle" onclick="setToggle('autoUpdate',this)" role="switch"></button></div>
+<div class="toggle-container"><div><div class="toggle-label" data-i18n="notifications"></div><div class="toggle-desc" data-i18n="notifications_desc"></div></div><button class="toggle" id="notificationsToggle" onclick="setToggle('notifications',this)" role="switch"></button></div>
+</div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Subscription Modal -->
+    <div class="modal-overlay" id="addSubModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 data-i18n="modal_add_sub">➕ افزودن سابسکریپشن</h3>
+                <button class="modal-close" onclick="closeModal('addSubModal')">✕</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label" data-i18n="modal_sub_name">نام سابسکریپشن</label>
+                <input type="text" class="form-input" id="subNameInput" placeholder="My Subscription">
+            </div>
+            <div class="form-group">
+                <label class="form-label" data-i18n="modal_sub_url">لینک سابسکریپشن</label>
+                <input type="text" class="form-input" id="subUrlInput" placeholder="https://..." dir="ltr">
+            </div>
+            <div class="form-group">
+                <label class="form-label" data-i18n="modal_sub_interval">فاصله بروزرسانی (ساعت)</label>
+                <input type="number" class="form-input" id="subIntervalInput" value="12" min="1" max="168" dir="ltr"><label class="auto-update-label"><input type="checkbox" id="subAutoUpdate" checked><span data-i18n="sub_auto_update"></span></label>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-primary" onclick="addSubscription()">💾 <span data-i18n="btn_save">ذخیره</span></button>
+                <button class="btn btn-secondary" onclick="closeModal('addSubModal')" data-i18n="btn_cancel">انصراف</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Config Modal -->
+    <div class="modal-overlay" id="addConfigModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 data-i18n="modal_add_config">➕ افزودن کانفیگ تکی</h3>
+                <button class="modal-close" onclick="closeModal('addConfigModal')">✕</button>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" data-i18n="modal_config_link">لینک کانفیگ</label>
+                <textarea class="form-input" id="configLinkInput" placeholder="vmess://... | vless://... | JSON" dir="ltr" rows="5"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-primary" onclick="addSingleConfig()">💾 <span data-i18n="btn_save">ذخیره</span></button>
+                <button class="btn btn-secondary" onclick="closeModal('addConfigModal')" data-i18n="btn_cancel">انصراف</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Config Modal -->
+    <div class="modal-overlay" id="editConfigModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 data-i18n="modal_edit_config">✏️ ویرایش کانفیگ</h3>
+                <button class="modal-close" onclick="closeModal('editConfigModal')">✕</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label" data-i18n="modal_config_name">نام کانفیگ</label>
+                <input type="text" class="form-input" id="editConfigName">
+            </div>
+            <div class="form-group">
+                <label class="form-label" data-i18n="modal_config_link">لینک کانفیگ</label>
+                <textarea class="form-input" id="editConfigLink" style="min-height: 100px; resize: vertical;" dir="ltr"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-primary" onclick="saveEditedConfig()">💾 <span data-i18n="btn_save">ذخیره</span></button>
+                <button class="btn btn-secondary" onclick="closeModal('editConfigModal')" data-i18n="btn_cancel">انصراف</button>
+            </div>
+        </div>
+    </div>
+
+<div class="modal-overlay" id="shareModal"><div class="modal"><div class="modal-header"><h3 data-i18n="ctx_share"></h3><button class="modal-close" onclick="closeModal('shareModal')">✕</button></div><img id="shareQR" alt="QR" class="share-qr"><textarea class="form-input" id="shareText" readonly dir="ltr" rows="5"></textarea><div class="connection-actions" style="margin-top:20px"><button class="btn btn-primary" onclick="copyShare()" data-i18n="ctx_copy"></button><button class="btn btn-secondary" onclick="saveShareQR()" data-i18n="save_qr"></button></div></div></div>
+<div class="modal-overlay" id="confirmModal"><div class="modal"><div class="modal-header"><h3 id="confirmTitle"></h3><button class="modal-close" onclick="closeModal('confirmModal')">✕</button></div><p class="host-note" id="confirmMessage"></p><div class="connection-actions"><button class="btn btn-danger" id="confirmButton" data-i18n="confirm"></button><button class="btn btn-secondary" onclick="closeModal('confirmModal')" data-i18n="btn_cancel"></button></div></div></div>
+<script>
+        const translations = {
+            fa: {
+                nav_servers: 'لیست سرورها',
+                nav_singbox: 'Sing-Box',
+                nav_update: 'بروزرسانی',
+                nav_logs: 'لاگ‌ها',
+                nav_settings: 'تنظیمات و تم',
+                status_disconnected: 'قطع',
+                status_connected: 'متصل',
+                page_servers_title: 'لیست سرورها',
+                page_servers_desc: 'مدیریت سابسکریپشن‌ها، کانفیگ‌ها و اتصال',
+                page_singbox_title: 'Sing-Box',
+                page_singbox_desc: 'تنظیمات هسته Sing-Box',
+                page_update_title: 'بروزرسانی',
+                page_update_desc: 'مدیریت بروزرسانی‌های برنامه و هسته',
+                page_logs_title: 'لاگ‌ها',
+                page_logs_desc: 'مشاهده لاگ‌های سیستم',
+                page_settings_title: 'تنظیمات و تم',
+                page_settings_desc: 'تنظیمات ظاهری و عمومی',
+                btn_refresh: 'بروزرسانی',
+                btn_connect: 'اتصال',
+                btn_disconnect: 'قطع',
+                btn_quick_connect: 'اتصال سریع',
+                btn_show_servers: 'انتخاب سرور',
+                btn_add_sub: 'سابسکریپشن',
+                btn_add_config: 'کانفیگ تکی',
+                btn_test_all: 'تست همه',
+                btn_sort_ping: 'مرتب‌سازی پینگ',
+                btn_sort_name: 'مرتب‌سازی نام',
+                btn_save: 'ذخیره',
+                btn_cancel: 'انصراف',
+                tab_all: 'همه',
+                tab_subs: 'سابسکریپشن‌ها',
+                tab_single: 'تکی',
+                ip_direct: 'IP مستقیم',
+                ip_proxy: 'IP پروکسی',
+                ip_country: 'کشور',
+                ip_isp: 'ISP',
+                ip_ping: 'پینگ',
+                ctx_connect: 'اتصال',
+                ctx_copy: 'کپی لینک',
+                ctx_edit: 'ویرایش',
+                ctx_ping: 'تست پینگ',
+                ctx_ip: 'مشاهده IP',
+                ctx_delete: 'حذف',
+                theme_title: 'انتخاب تم',
+                theme_blue: 'آبی تیره',
+                theme_purple: 'بنفش تیره',
+                theme_emerald: 'زمردی',
+                theme_rose: 'رز',
+                theme_carbon: 'کربنی',
+                theme_neon: 'نئون',
+                theme_matrix: 'ماتریکس',
+                theme_light: 'روشن',
+                custom_title: 'تنظیمات دلخواه',
+                custom_blur: 'میزان بلور (Blur)',
+                custom_opacity: 'شفافیت (Opacity)',
+                custom_radius: 'گردی گوشه‌ها',
+                custom_border: 'ضخامت حاشیه',
+                custom_accent: 'رنگ اصلی',
+                custom_bg: 'رنگ پس‌زمینه',
+                preset_glass: '🔮 شیشه‌ای',
+                preset_carbon: '⚫ کربنی',
+                preset_neon: '💡 نئون',
+                preset_matte: '🎨 مات',
+                preset_sharp: '📐 تیز',
+                preset_reset: '🔄 پیش‌فرض',
+                settings_general: 'تنظیمات عمومی',
+                settings_ports: 'تنظیمات پورت',
+                setting_autostart: 'شروع خودکار با ویندوز',
+                setting_autostart_desc: 'اجرای برنامه هنگام بالا آمدن سیستم',
+                setting_autoconnect: 'اتصال خودکار هنگام شروع',
+                setting_autoconnect_desc: 'اتصال به آخرین سرور',
+                setting_tray: 'System Tray',
+                setting_tray_desc: 'بستن به جای خروج کامل',
+                setting_autoupdate: 'بروزرسانی خودکار',
+                setting_autoupdate_desc: 'دانلود خودکار بروزرسانی',
+                setting_ipv6: 'IPv6 Support',
+                setting_ipv6_desc: 'فعال‌سازی IPv6',
+                singbox_title: 'تنظیمات Sing-Box',
+                singbox_core: 'فعال‌سازی Sing-Box Core',
+                singbox_core_desc: 'استفاده از هسته Sing-Box به جای Xray',
+                singbox_tun_desc: 'استفاده از TUN برای تمام ترافیک',
+                singbox_dns_desc: 'اعتراض و مدیریت درخواست‌های DNS',
+                singbox_sniff_desc: 'تشخیص خودکار SNI در ترافیک TLS',
+                singbox_dns: 'DNS Server',
+                update_title: 'بروزرسانی',
+                update_current: 'نسخه فعلی: 0.9.0',
+                update_latest: 'بررسی گیت‌هاب',
+                update_ready: 'آماده دانلود',
+                update_download: 'دانلود',
+                update_check: 'بررسی',
+                update_cores: 'بروزرسانی هسته‌ها',
+                update_xray_desc: 'نسخه: 1.8.6 | آخرین: 1.8.20',
+                update_singbox_desc: 'نسخه: 1.8.0 | آخرین: 1.9.2',
+                update_geoip_desc: 'آخرین بروزرسانی: 2 روز پیش',
+                logs_title: 'لاگ‌های سیستم',
+                logs_clear: 'پاک کردن',
+                logs_export: 'خروجی',
+                modal_add_sub: '➕ افزودن سابسکریپشن',
+                modal_sub_name: 'نام سابسکریپشن',
+                modal_sub_url: 'لینک سابسکریپشن',
+                modal_sub_interval: 'فاصله بروزرسانی (ساعت)',
+                modal_add_config: '➕ افزودن کانفیگ تکی',
+                modal_config_name: 'نام کانفیگ',
+                modal_config_link: 'لینک کانفیگ',
+                modal_edit_config: '✏️ ویرایش کانفیگ',
+                empty_single: 'کانفیگ تکی وجود ندارد',
+                empty_subs: 'سابسکریپشنی اضافه نشده',
+                nodes_count: 'سرور',
+                toast_connected: 'متصل شدید',
+                toast_disconnected: 'اتصال قطع شد',
+                toast_copied: 'لینک کپی شد',
+                toast_deleted: 'حذف شد',
+                toast_added: 'اضافه شد',
+                toast_saved: 'ذخیره شد',
+                toast_ping_done: 'تست پینگ کامل شد',
+                toast_sorted: 'مرتب شد',
+                connection_subtitle: 'برای اتصال دکمه را فشار دهید',
+                connection_subtitle_connected: 'اتصال برقرار است',
+                stat_speed: 'سرعت',
+                stat_ping: 'پینگ',
+                stat_uptime: 'زمان اتصال',
+                stat_data: 'مصرف'
+            },
+            en: {
+                nav_servers: 'Server List',
+                nav_singbox: 'Sing-Box',
+                nav_update: 'Update',
+                nav_logs: 'Logs',
+                nav_settings: 'Settings & Theme',
+                status_disconnected: 'Disconnected',
+                status_connected: 'Connected',
+                page_servers_title: 'Server List',
+                page_servers_desc: 'Manage subscriptions, configs and connection',
+                page_singbox_title: 'Sing-Box',
+                page_singbox_desc: 'Sing-Box core settings',
+                page_update_title: 'Update',
+                page_update_desc: 'Manage app and core updates',
+                page_logs_title: 'Logs',
+                page_logs_desc: 'View system logs',
+                page_settings_title: 'Settings & Theme',
+                page_settings_desc: 'Appearance and general settings',
+                btn_refresh: 'Refresh',
+                btn_connect: 'Connect',
+                btn_disconnect: 'Disconnect',
+                btn_quick_connect: 'Quick Connect',
+                btn_show_servers: 'Select Server',
+                btn_add_sub: 'Subscription',
+                btn_add_config: 'Single Config',
+                btn_test_all: 'Test All',
+                btn_sort_ping: 'Sort by Ping',
+                btn_sort_name: 'Sort by Name',
+                btn_save: 'Save',
+                btn_cancel: 'Cancel',
+                tab_all: 'All',
+                tab_subs: 'Subscriptions',
+                tab_single: 'Single',
+                ip_direct: 'Direct IP',
+                ip_proxy: 'Proxy IP',
+                ip_country: 'Country',
+                ip_isp: 'ISP',
+                ip_ping: 'Ping',
+                ctx_connect: 'Connect',
+                ctx_copy: 'Copy Link',
+                ctx_edit: 'Edit',
+                ctx_ping: 'Test Ping',
+                ctx_ip: 'View IP',
+                ctx_delete: 'Delete',
+                theme_title: 'Select Theme',
+                theme_blue: 'Dark Blue',
+                theme_purple: 'Dark Purple',
+                theme_emerald: 'Emerald',
+                theme_rose: 'Rose',
+                theme_carbon: 'Carbon',
+                theme_neon: 'Neon',
+                theme_matrix: 'Matrix',
+                theme_light: 'Light',
+                custom_title: 'Custom Settings',
+                custom_blur: 'Blur Amount',
+                custom_opacity: 'Opacity',
+                custom_radius: 'Border Radius',
+                custom_border: 'Border Width',
+                custom_accent: 'Accent Color',
+                custom_bg: 'Background Color',
+                preset_glass: '🔮 Glass',
+                preset_carbon: '⚫ Carbon',
+                preset_neon: '💡 Neon',
+                preset_matte: '🎨 Matte',
+                preset_sharp: '📐 Sharp',
+                preset_reset: '🔄 Reset',
+                settings_general: 'General Settings',
+                settings_ports: 'Port Settings',
+                setting_autostart: 'Start with Windows',
+                setting_autostart_desc: 'Run app on system startup',
+                setting_autoconnect: 'Auto-connect on start',
+                setting_autoconnect_desc: 'Connect to last server',
+                setting_tray: 'System Tray',
+                setting_tray_desc: 'Minimize instead of exit',
+                setting_autoupdate: 'Auto Update',
+                setting_autoupdate_desc: 'Download updates automatically',
+                setting_ipv6: 'IPv6 Support',
+                setting_ipv6_desc: 'Enable IPv6',
+                singbox_title: 'Sing-Box Settings',
+                singbox_core: 'Enable Sing-Box Core',
+                singbox_core_desc: 'Use Sing-Box instead of Xray',
+                singbox_tun_desc: 'Use TUN for all traffic',
+                singbox_dns_desc: 'Intercept DNS requests',
+                singbox_sniff_desc: 'Auto-detect SNI in TLS',
+                singbox_dns: 'DNS Server',
+                update_title: 'Update',
+                update_current: 'Current: 0.9.0',
+                update_latest: 'Check GitHub',
+                update_ready: 'Ready to download',
+                update_download: 'Download',
+                update_check: 'Check',
+                update_cores: 'Core Updates',
+                update_xray_desc: 'v1.8.6 | Latest: 1.8.20',
+                update_singbox_desc: 'v1.8.0 | Latest: 1.9.2',
+                update_geoip_desc: 'Last update: 2 days ago',
+                logs_title: 'System Logs',
+                logs_clear: 'Clear',
+                logs_export: 'Export',
+                modal_add_sub: '➕ Add Subscription',
+                modal_sub_name: 'Subscription Name',
+                modal_sub_url: 'Subscription URL',
+                modal_sub_interval: 'Update Interval (hours)',
+                modal_add_config: '➕ Add Single Config',
+                modal_config_name: 'Config Name',
+                modal_config_link: 'Config Link',
+                modal_edit_config: '✏️ Edit Config',
+                empty_single: 'No single configs',
+                empty_subs: 'No subscriptions added',
+                nodes_count: 'nodes',
+                toast_connected: 'Connected successfully',
+                toast_disconnected: 'Disconnected',
+                toast_copied: 'Link copied',
+                toast_deleted: 'Deleted',
+                toast_added: 'Added',
+                toast_saved: 'Saved',
+                toast_ping_done: 'Ping test completed',
+                toast_sorted: 'Sorted',
+                connection_subtitle: 'Press button to connect',
+                connection_subtitle_connected: 'Connection established',
+                stat_speed: 'Speed',
+                stat_ping: 'Ping',
+                stat_uptime: 'Uptime',
+                stat_data: 'Data'
+            }
+        };
+
+
+/*MELAVO_BRIDGE*/
+</script>
+</body></html>

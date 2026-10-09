@@ -75,6 +75,9 @@ sealed partial class PowerControl:Button {
  protected override void OnPaint(PaintEventArgs e){if(Design.Glass){PaintGlass(e.Graphics);return;}var g=e.Graphics;Design.PaintBackdrop(g,this);g.SmoothingMode=SmoothingMode.AntiAlias;float unit=Math.Min(Width,Height),scale=unit/170f,cx=Width/2f,cy=Height/2f;var color=State==ConnectionState.Error?Design.Error:State==ConnectionState.Disconnected?Design.Muted:Design.Accent;float pulse=(State==ConnectionState.Connecting?(float)(Math.Sin(Phase)*2+3):2)*scale;float outerInset=10*scale,innerInset=17*scale;using var outer=new Pen(Color.FromArgb(45,color),7*scale);g.DrawEllipse(outer,cx-unit*.5f+outerInset-pulse,cy-unit*.5f+outerInset-pulse,unit-2*outerInset+2*pulse,unit-2*outerInset+2*pulse);using var fill=new SolidBrush(pressed?Design.Selection:hover?Design.SurfaceSecondary:Design.Surface);g.FillEllipse(fill,cx-unit*.5f+innerInset,cy-unit*.5f+innerInset,unit-2*innerInset,unit-2*innerInset);using var outline=new Pen(Design.Border,2*scale);g.DrawEllipse(outline,cx-unit*.5f+innerInset,cy-unit*.5f+innerInset,unit-2*innerInset,unit-2*innerInset);using var pen=new Pen(color,Math.Max(2.6f,4*scale)){StartCap=LineCap.Round,EndCap=LineCap.Round};float glyph=58*scale;g.DrawArc(pen,cx-glyph/2,cy-glyph*.40f,glyph,glyph,-45,270);g.DrawLine(pen,cx,cy-glyph*.60f,cx,cy-glyph*.06f);if(State is ConnectionState.Connecting or ConnectionState.Disconnecting){using var progress=new Pen(color,3*scale);g.DrawArc(progress,cx-unit*.5f+8*scale,cy-unit*.5f+8*scale,unit-16*scale,unit-16*scale,Phase*45,85);}if(Focused){using var focus=new Pen(color,2*scale);g.DrawEllipse(focus,cx-unit*.5f+3*scale,cy-unit*.5f+3*scale,unit-6*scale,unit-6*scale);}}
 }
 sealed class UiPreferences {
+ public string WebTheme{get;set;}="dark-blue";
+ public Dictionary<string,string> WebAppearance{get;set;}=new();
+ public bool TunMode{get;set;}=true;
  public bool AutoAppUpdate{get;set;}=true;
  public string VisualStyle{get;set;}="glass";
  public string Language{get;set;}="en";public bool Dark{get;set;}=true;public bool Tray{get;set;}=true;public bool Notifications{get;set;}=false;
@@ -83,15 +86,3 @@ sealed class UiPreferences {
  public static UiPreferences Read(){try{return File.Exists(PathName)?JsonSerializer.Deserialize<UiPreferences>(File.ReadAllText(PathName))??new():new();}catch{return new();}}
  public void Save(){Directory.CreateDirectory(SubscriptionStore.DirectoryPath);var tmp=PathName+".tmp";File.WriteAllText(tmp,JsonSerializer.Serialize(this));File.Move(tmp,PathName,true);}
 }
-
-
-
-
-
-
-
-
-
-
-
-

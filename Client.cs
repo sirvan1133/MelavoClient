@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Principal;
@@ -22,12 +22,13 @@ sealed partial class Client:Form {
  readonly ModernButton subscriptionsTab=new(){Text="ساب‌ها",Selected=true},singleConfigsTab=new(){Text="کانفیگ‌های تکی"},shareConfig=new(){Text="اشتراک‌گذاری"};
  static string Core(string name)=>Path.Combine(AppContext.BaseDirectory,"core",name);
  readonly bool preview;
- public Client(bool previewMode=false){
-  preview=previewMode;AutoScaleDimensions=new SizeF(96,96);AutoScaleMode=AutoScaleMode.Dpi;
+ public Client(bool previewMode=false,bool webMode=false){
+  useWebShell=webMode;preview=previewMode;AutoScaleDimensions=new SizeF(96,96);AutoScaleMode=AutoScaleMode.Dpi;
   BuildShell();InitializeConfigMenu();InitializeAutoUpdate();InitializeAppUpdates();
   add.Click+=(_,_)=>ShowSubscriptionDialog();refresh.Click+=async(_,_)=>{if(groups.SelectedItem is SubscriptionGroup g&&IsSubscription(g))await UpdateGroups(new[]{g});};start.Click+=async(_,_)=>await Connect();stop.Click+=(_,_)=>Disconnect();groups.SelectedIndexChanged+=(_,_)=>{if(groups.SelectedItem is SubscriptionGroup g){if(singleConfigScope)selectedSingleGroupId=g.Id;else selectedSubscriptionId=g.Id;}ShowGroup();};servers.SelectedIndexChanged+=(_,_)=>{if(!fillingServers)SetControls();};subscriptionsTab.Click+=(_,_)=>SetConfigScope(false);singleConfigsTab.Click+=(_,_)=>SetConfigScope(true);shareConfig.Click+=(_,_)=>ShowConfigShare();
   FormClosing+=async(_,e)=>{if(busy||updating){e.Cancel=true;status.Text=L("An operation is running. Please wait.","عملیات در حال اجراست؛ چند لحظه صبر کنید.");return;}if(pingTesting){e.Cancel=true;pingCancellation.Cancel();while(pingTesting)await Task.Delay(50);Close();return;}Disconnect();job.Dispose();};
   Shown+=async(_,_)=>{NormalizeTypography();var workArea=Screen.FromControl(this).WorkingArea;if(Height>workArea.Height-30)Height=workArea.Height-30;if(Width>workArea.Width-30)Width=workArea.Width-30;MinimumSize=new Size(Math.Min(1240,workArea.Width-30),Math.Min(780,workArea.Height-30));MaximumSize=Size.Empty;MaximizedBounds=workArea;CenterToScreen();if(preview){LoadPreview();return;}SessionFiles.CleanupStale();ReadUpdateResult();try{subscriptions=SubscriptionStore.Read();PopulateGroups(null);}catch{details.Text=L("Could not read saved groups. The original file was preserved.","خواندن گروه‌های ذخیره‌شده ناموفق بود. فایل اصلی حفظ شده است.");}if(subscriptions.Any(g=>IsSubscription(g)&&g.AutoUpdate))await UpdateGroups(subscriptions.Where(g=>IsSubscription(g)&&g.AutoUpdate).ToArray());};
+  if(useWebShell)InitializeWebShell();
   var timer=new System.Windows.Forms.Timer{Interval=1000};timer.Tick+=(_,_)=>{if(!busy&&xray!=null&&(xray.HasExited||(box?.HasExited??false))){var error=CoreError(box?.HasExited==true?box:xray);Disconnect();status.Text=L("Engine stopped; connection closed.","هسته متوقف شد؛ اتصال قطع شد.");details.Text=error;}};timer.Start();FormClosed+=(_,_)=>timer.Dispose();
  }
  void ShowGroup(){if(!fillingServers)FillServers();}

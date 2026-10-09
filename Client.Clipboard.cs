@@ -3,6 +3,7 @@ using System.Text.Json.Nodes;
 namespace MelavoClient;
 sealed partial class Client {
  protected override bool ProcessCmdKey(ref Message msg,Keys keyData){
+  if(useWebShell)return base.ProcessCmdKey(ref msg,keyData);
   Control? focused=ActiveControl;while(focused is ContainerControl container&&container.ActiveControl!=null)focused=container.ActiveControl;
   if(currentPage=="Home"&&!busy&&!updating&&!pingTesting&&xray==null){
    if(keyData==(Keys.Control|Keys.V)){

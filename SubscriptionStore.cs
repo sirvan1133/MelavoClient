@@ -11,6 +11,7 @@ sealed class SubscriptionGroup {
  public List<JsonObject> SourceProfiles {get;set;}=new();
  public Dictionary<string,JsonObject> Overrides {get;set;}=new();
  public bool AutoUpdate {get;set;}=true;
+ public int AutoUpdateHours {get;set;}=12;
  public DateTime? Updated {get;set;}
  public long? UsedBytes {get;set;}
  public long? TotalBytes {get;set;}
