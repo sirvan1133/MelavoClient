@@ -4,7 +4,7 @@ A modern Windows VPN client with a clean interface and support for Xray and sing
 
 Requires [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/).
 
-[Download for Windows](https://github.com/sirvan1133/MelavoClient/releases/download/v0.9.1/Melavo-VPN-0.9.1-Windows-x64.zip)
+[Download for Windows](https://github.com/sirvan1133/MelavoClient/releases/download/v0.9.2/Melavo-VPN-0.9.2-Windows-x64.zip)
 
 ## فارسی
 
