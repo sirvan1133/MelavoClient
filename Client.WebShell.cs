@@ -19,6 +19,7 @@ sealed partial class Client {
  static readonly string[] webThemes={"dark-blue","dark-purple","dark-emerald","dark-rose","dark-carbon","dark-neon","dark-matrix","light"};
  static string WebResource(string name){using var stream=typeof(Client).Assembly.GetManifestResourceStream("MelavoClient.Assets."+name)??throw new InvalidOperationException("UI resource missing.");using var reader=new StreamReader(stream);return reader.ReadToEnd();}
  void InitializeWebShell(){
+  string monitor=Screen.FromControl(this).DeviceName;DpiChanged+=(_,_)=>BeginInvoke(new Action(()=>FitPortraitWindow()));Move+=(_,_)=>{var current=Screen.FromControl(this).DeviceName;if(current!=monitor){monitor=current;if(IsHandleCreated)BeginInvoke(new Action(()=>FitPortraitWindow()));}};EventHandler displayChanged=(_,_)=>{if(IsHandleCreated&&!IsDisposed)BeginInvoke(new Action(()=>FitPortraitWindow()));};Microsoft.Win32.SystemEvents.DisplaySettingsChanged+=displayChanged;FormClosed+=(_,_)=>Microsoft.Win32.SystemEvents.DisplaySettingsChanged-=displayChanged;
   foreach(Control child in Controls)child.Visible=false;Padding=Padding.Empty;
   webShell=new WebView2{Dock=DockStyle.Fill,DefaultBackgroundColor=Color.FromArgb(10,14,26)};Controls.Add(webShell);webShell.BringToFront();
   Shown+=async(_,_)=>{try{await LoadWebShell();}catch(Exception e){WebStartupError(e);}};
@@ -47,8 +48,8 @@ sealed partial class Client {
   };
   core.ProcessFailed+=(_,e)=>{webReady=false;webStateTimer.Stop();if(!IsDisposed)WebStartupError(new Exception(L("The interface process stopped. Reopen Melavo.","پردازش رابط متوقف شد؛ برنامه را دوباره باز کنید.")));};
   await core.AddScriptToExecuteOnDocumentCreatedAsync("window.__melavoErrors=[];window.addEventListener('error',e=>window.__melavoErrors.push(e.message));window.addEventListener('unhandledrejection',e=>window.__melavoErrors.push(String(e.reason)));");
-  core.NavigateToString(WebResource("WebShell.html").Replace("/*MELAVO_BRIDGE*/",WebResource("WebShell.js")));
-  tun.Checked=preferences.TunMode;var area=Screen.FromControl(this).WorkingArea;MinimumSize=new(Math.Min(1000,area.Width-30),Math.Min(700,area.Height-30));
+  core.NavigateToString(WebResource("WebShell.html").Replace("</style>",WebResource("Portrait.css")+"</style>").Replace("/*MELAVO_BRIDGE*/",WebResource("WebShell.js").Replace("setLang('en',null,false);showPage('servers');runAction('ready');",WebResource("Portrait.js")+"\nsetLang('en',null,false);showPage('servers');runAction('ready');")));
+  tun.Checked=preferences.TunMode;FitPortraitWindow();
  }
  void WebReply(int id,object? result,string? error){if(IsDisposed||webShell?.CoreWebView2==null)return;webShell.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new{type="reply",id,result,error}));}
  static string WebId(SubscriptionGroup group,int index)=>group.Id+":"+SourceKey(group.SourceProfiles.Count>index?group.SourceProfiles[index]:group.Profiles[index])+":"+index;
@@ -63,7 +64,7 @@ sealed partial class Client {
   switch(action){
    case "ready":webReady=true;lastWebState="";webStateTimer.Start();PushWebState();if(!preview)_=LoadDirectIp();return true;
    case "drag":ReleaseCapture();SendMessage(Handle,0xA1,(IntPtr)2,IntPtr.Zero);return true;
-   case "maximize":ToggleMaximizeWindow();return true;
+   case "maximize":FitPortraitWindow(true);return true;
    case "minimize":WindowState=FormWindowState.Minimized;return true;
    case "close":Close();return true;
    case "github":if(!preview)Process.Start(new ProcessStartInfo("https://github.com/sirvan1133"){UseShellExecute=true});return true;
