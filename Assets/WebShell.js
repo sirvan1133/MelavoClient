@@ -10,7 +10,7 @@ let subscriptions=[],singleConfigs=[],hostState=null,groupsSignature='',ready=fa
 const closedGroups=new Set(),pending=new Map();let requestId=0,sortBy='',appearanceTimer;
 const $=id=>document.getElementById(id),t=key=>translations[currentLang][key]||translations.en[key]||key;
 const escapeHTML=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function rpc(action,args={}){return new Promise((resolve,reject)=>{if(!window.chrome?.webview){reject(new Error(t('offline')));return;}const id=++requestId;const timer=setTimeout(()=>{pending.delete(id);reject(new Error(t('busy')));},180000);pending.set(id,{resolve,reject,timer});window.chrome.webview.postMessage({id,action,...args});});}
+function rpc(action,args={}){return new Promise((resolve,reject)=>{if(!window.chrome?.webview){reject(new Error(t('offline')));return;}const id=++requestId;const timer=setTimeout(()=>{pending.delete(id);reject(new Error(t('busy')));},['connect','toggle-connect'].includes(action)?360000:180000);pending.set(id,{resolve,reject,timer});window.chrome.webview.postMessage({id,action,...args});});}
 async function runAction(action,args={}){try{return await rpc(action,args);}catch(e){showToast('⚠️',e.message);return null;}}
 function setText(id,value){const el=$(id);if(el&&el.textContent!==String(value??'')){el.textContent=value??'';el.title=String(value??'');}}
 function captionDrag(event){if(event.button===0&&!event.target.closest('button'))runAction('drag');}

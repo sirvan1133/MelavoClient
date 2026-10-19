@@ -12,6 +12,7 @@ sealed partial class Client {
    foreach(int dpi in new[]{96,120,144,192})foreach(var area in new[]{new Rectangle(0,0,1280,696),new Rectangle(0,0,1920,1040),new Rectangle(-2560,0,2560,1400),new Rectangle(0,0,3840,2100)}){
     var size=PortraitSize(area,dpi);if(size.Width>area.Width||size.Height>area.Height||size.Width>=size.Height)throw new Exception("Monitor size bounds");}report.Add("PASS: portrait sizing fits four monitor work areas at 100/125/150/200 percent");
    client.CommitGroups(new(),null);client.PushWebState();await Task.Delay(150);
+   await Check("document.querySelector('#portraitAutomatic')!==null&&document.querySelector('#portraitServerName').textContent==='Smart automatic selection'","Automatic option is visible as the default selection");
    foreach(var viewport in new[]{new Size(410,860),new Size(360,640),new Size(320,568)})foreach(string language in new[]{"en","fa"}){
     await core.CallDevToolsProtocolMethodAsync("Emulation.setDeviceMetricsOverride",JsonSerializer.Serialize(new{width=viewport.Width,height=viewport.Height,deviceScaleFactor=1,mobile=false}));
     await core.ExecuteScriptAsync($"setLang('{language}',null,false);portraitHomeView()");await Task.Delay(400);

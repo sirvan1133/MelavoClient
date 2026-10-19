@@ -4,7 +4,7 @@ A modern VPN client for Windows and Android, available in English and Persian.
 
 Android 7 or newer. Windows requires [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/).
 
-[Download for Windows](https://github.com/sirvan1133/MelavoClient/releases/download/v0.10.0/Melavo-VPN-0.10.0-Windows-x64.zip)
+[Download for Windows](https://github.com/sirvan1133/MelavoClient/releases/download/v0.10.1/Melavo-VPN-0.10.1-Windows-x64.zip)
 
 [Download for Android](https://github.com/sirvan1133/MelavoClient/releases/download/v0.9.2/Melavo-VPN-0.9.2-Android-universal.apk)
 
